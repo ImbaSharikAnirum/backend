@@ -1,0 +1,131 @@
+{
+  "kind": "collectionType",
+  "collectionName": "groups",
+  "info": {
+    "singularName": "group",
+    "pluralName": "groups",
+    "displayName": "Group",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "description": {
+      "type": "string"
+    },
+    "monday": {
+      "type": "boolean",
+      "default": false
+    },
+    "tuesday": {
+      "type": "boolean",
+      "default": false
+    },
+    "wednesday": {
+      "type": "boolean",
+      "default": false
+    },
+    "thursday": {
+      "type": "boolean",
+      "default": false
+    },
+    "friday": {
+      "type": "boolean",
+      "default": false
+    },
+    "saturday": {
+      "type": "boolean",
+      "default": false
+    },
+    "sunday": {
+      "type": "boolean",
+      "default": false
+    },
+    "start_time": {
+      "type": "time"
+    },
+    "end_time": {
+      "type": "time"
+    },
+    "start_day": {
+      "type": "date"
+    },
+    "end_day": {
+      "type": "date"
+    },
+    "capacity": {
+      "type": "integer"
+    },
+    "format": {
+      "type": "string"
+    },
+    "direction": {
+      "type": "string"
+    },
+    "age_start": {
+      "type": "integer"
+    },
+    "age_end": {
+      "type": "integer"
+    },
+    "time_zone": {
+      "type": "string"
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "teacher": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "groups"
+    },
+    "price_lesson": {
+      "type": "biginteger"
+    },
+    "district": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::district.district",
+      "inversedBy": "groups"
+    },
+    "city": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::city.city",
+      "inversedBy": "groups"
+    },
+    "address": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::address.address",
+      "inversedBy": "groups"
+    },
+    "start_time_moscow": {
+      "type": "time"
+    },
+    "language": {
+      "type": "string"
+    },
+    "level": {
+      "type": "string"
+    },
+    "inventory": {
+      "type": "boolean",
+      "default": false
+    },
+    "items": {
+      "type": "string"
+    }
+  }
+}
