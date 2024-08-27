@@ -13,7 +13,7 @@
   "pluginOptions": {},
   "attributes": {
     "description": {
-      "type": "string"
+      "type": "text"
     },
     "monday": {
       "type": "boolean",

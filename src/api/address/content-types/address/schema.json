@@ -4,7 +4,8 @@
   "info": {
     "singularName": "address",
     "pluralName": "addresses",
-    "displayName": "Address"
+    "displayName": "Address",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -19,6 +20,12 @@
       "relation": "oneToMany",
       "target": "api::group.group",
       "mappedBy": "address"
+    },
+    "lat": {
+      "type": "string"
+    },
+    "lng": {
+      "type": "string"
     }
   }
 }
