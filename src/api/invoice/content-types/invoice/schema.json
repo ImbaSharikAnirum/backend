@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "invoices",
+  "info": {
+    "singularName": "invoice",
+    "pluralName": "invoices",
+    "displayName": "Invoice"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "family": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "sum": {
+      "type": "float"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "start_day": {
+      "type": "date"
+    },
+    "end_day": {
+      "type": "date"
+    },
+    "status_payment": {
+      "type": "boolean",
+      "default": false
+    },
+    "group": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::group.group",
+      "inversedBy": "invoices"
+    }
+  }
+}

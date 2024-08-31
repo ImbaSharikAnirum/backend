@@ -4,7 +4,7 @@ module.exports = (plugin) => {
   plugin.controllers.auth.callback = async (ctx) => {
     await originalAuthController(ctx);
     const userId = ctx.body.user.id; // Получаем ID пользователя из контекста
-
+    
     // Извлекаем пользователя с ролью
     const userWithRole = await strapi.entityService.findOne(
       "plugin::users-permissions.user",

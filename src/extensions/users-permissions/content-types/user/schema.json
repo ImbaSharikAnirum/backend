@@ -98,6 +98,12 @@
     },
     "family": {
       "type": "string"
+    },
+    "students": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::student.student",
+      "mappedBy": "users_permissions_user"
     }
   }
 }
