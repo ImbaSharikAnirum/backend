@@ -41,6 +41,12 @@
       "relation": "manyToOne",
       "target": "api::group.group",
       "inversedBy": "invoices"
+    },
+    "activities": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::activity.activity",
+      "mappedBy": "invoice"
     }
   }
 }
