@@ -10,16 +10,12 @@ module.exports = {
 
     try {
       const response = await axios.get(
-        `https://api.pinterest.com/search/pins`, // Изучите точный URL в документации
+        `https://api.pinterest.com/v5/search/pins?query=${query}`, // Изучите точный URL в документации
         {
           headers: {
             Authorization: `Bearer ${process.env.PINTEREST_ACCESS_TOKEN}`, // замените на актуальный маркер
             Accept: "application/json",
             "Content-Type": "application/json",
-          },
-          params: {
-            query,
-            page_size: 10, // Количество результатов
           },
         }
       );
