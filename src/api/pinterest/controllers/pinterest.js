@@ -9,6 +9,7 @@ module.exports = {
     if (!query) {
       return ctx.badRequest("Query parameter is required");
     }
+    console.log("Pinterest Access Token:", process.env.PINTEREST_ACCESS_TOKEN);
 
     try {
       // Выполняем запрос к Pinterest API
@@ -25,6 +26,7 @@ module.exports = {
 
       // Возвращаем данные в контексте Strapi
       return ctx.send(response.data);
+      ф;
     } catch (err) {
       console.error(
         "Error fetching Pinterest data:",
