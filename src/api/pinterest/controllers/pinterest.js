@@ -14,8 +14,8 @@ module.exports = {
         "https://api.pinterest.com/v5/oauth/token",
         querystring.stringify({
           code,
-          // client_id: process.env.PINTEREST_CLIENT_ID,
-          // client_secret: process.env.PINTEREST_CLIENT_SECRET,
+          client_id: process.env.PINTEREST_CLIENT_ID,
+          client_secret: process.env.PINTEREST_CLIENT_SECRET,
           redirect_uri: process.env.PINTEREST_REDIRECT_URI,
           grant_type: "authorization_code",
         }),
