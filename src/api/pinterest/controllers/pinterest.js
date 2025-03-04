@@ -1,4 +1,5 @@
 const axios = require("axios");
+const querystring = require("querystring");
 
 module.exports = {
   async authenticate(ctx) {
@@ -9,25 +10,24 @@ module.exports = {
     }
     console.log(code, "code");
     try {
-      // Отправка запроса на получение токена доступа от Pinterest
       const response = await axios.post(
-        "https://api.pinterest.com/v1/oauth/access_token",
-        null,
+        "https://api.pinterest.com/v5/oauth/token",
+        querystring.stringify({
+          code,
+          client_id: process.env.PINTEREST_CLIENT_ID,
+          client_secret: process.env.PINTEREST_CLIENT_SECRET,
+          redirect_uri: process.env.PINTEREST_REDIRECT_URI,
+          grant_type: "authorization_code",
+        }),
         {
-          params: {
-            code: code,
-            client_id: process.env.PINTEREST_CLIENT_ID,
-            client_secret: process.env.PINTEREST_CLIENT_SECRET,
-            redirect_uri: process.env.PINTEREST_REDIRECT_URI,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
           },
         }
       );
 
       const { access_token } = response.data;
-      console.log(response.data, "response");
       if (access_token) {
-        // Сохраните токен в базе данных или в другом безопасном месте
-        // Например, в переменной сессии или отправьте обратно на фронтенд
         ctx.send({ access_token });
       } else {
         ctx.badRequest("Токен не получен");

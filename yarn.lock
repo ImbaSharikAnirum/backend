@@ -8747,6 +8747,11 @@ qs@^6.11.2:
   dependencies:
     side-channel "^1.0.6"
 
+querystring@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.npmjs.org/querystring/-/querystring-0.2.1.tgz"
+  integrity sha512-wkvS7mL/JMugcup3/rMitHmd9ecIGd2lhFhK9N3UUQ450h66d1r3Y9nvXzQAW1Lq+wyx61k/1pfKS5KuKiyEbg==
+
 queue-microtask@^1.2.2:
   version "1.2.3"
   resolved "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.2.3.tgz"
