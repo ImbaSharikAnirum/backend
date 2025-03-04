@@ -28,12 +28,19 @@ module.exports = {
 
       const { access_token } = response.data;
 
-      // Сохраняем access_token в базу (например, в пользователя)
-      const user = await strapi.entityService.create("api::user.user", {
-        data: { pinterest_token: access_token },
+      // Допустим, у вас есть идентификатор пользователя (например, в cookies или через запрос)
+      const userId = ctx.state.user.id; // или извлекайте идентификатор пользователя через другую логику
+
+      // Обновляем пользователя с новым токеном
+      const user = await strapi.entityService.update("api::user.user", userId, {
+        data: { pinterest_token: access_token }, // Сохраняем токен
       });
 
-      return ctx.send({ message: "Authenticated", user });
+      return ctx.send({
+        message: "Authenticated and token saved successfully",
+        user,
+        access_token,
+      });
     } catch (error) {
       console.error(
         "Pinterest Auth Error:",
