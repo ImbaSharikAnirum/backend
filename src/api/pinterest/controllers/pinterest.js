@@ -9,6 +9,15 @@ module.exports = {
       return ctx.badRequest("Code is required");
     }
     console.log(code, "code");
+    const params = querystring.stringify({
+      code: "testCode",
+      client_id: "yourClientId",
+      client_secret: "yourClientSecret",
+      redirect_uri: "yourRedirectUri",
+      grant_type: "authorization_code",
+    });
+
+    console.log(params, "params");
     try {
       const response = await axios.post(
         "https://api.pinterest.com/v5/oauth/token",
