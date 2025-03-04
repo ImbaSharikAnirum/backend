@@ -10,10 +10,10 @@ module.exports = {
     }
     console.log(code, "code");
     const params = querystring.stringify({
-      code: "testCode",
-      client_id: "yourClientId",
-      client_secret: "yourClientSecret",
-      redirect_uri: "yourRedirectUri",
+      code,
+      client_id: process.env.PINTEREST_CLIENT_ID,
+      client_secret: process.env.PINTEREST_CLIENT_SECRET,
+      redirect_uri: process.env.PINTEREST_REDIRECT_URI,
       grant_type: "authorization_code",
     });
 
