@@ -7,7 +7,7 @@ module.exports = {
     if (!code) {
       return ctx.badRequest("Code is required");
     }
-
+    console.log(code, "code");
     try {
       const response = await axios.post(
         "https://api.pinterest.com/v5/oauth/token",
@@ -25,7 +25,7 @@ module.exports = {
           },
         }
       );
-
+      console.log(response.data, "response");
       const { access_token } = response.data;
 
       // Допустим, у вас есть идентификатор пользователя (например, в cookies или через запрос)
