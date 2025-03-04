@@ -8,5 +8,13 @@ module.exports = {
         policies: [],
       },
     },
+    {
+      method: "POST",
+      path: "/pinterest/auth",
+      handler: "pinterest.authenticate",
+      config: {
+        auth: false,
+      },
+    },
   ],
 };

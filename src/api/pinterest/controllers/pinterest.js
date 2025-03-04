@@ -1,6 +1,48 @@
 const axios = require("axios");
 
 module.exports = {
+  async authenticate(ctx) {
+    const { code } = ctx.request.body;
+
+    if (!code) {
+      return ctx.badRequest("Code is required");
+    }
+
+    try {
+      const response = await axios.post(
+        "https://api.pinterest.com/v5/oauth/token",
+        null,
+        {
+          params: {
+            grant_type: "authorization_code",
+            client_id: process.env.PINTEREST_CLIENT_ID,
+            client_secret: process.env.PINTEREST_CLIENT_SECRET,
+            code,
+            redirect_uri: process.env.PINTEREST_REDIRECT_URI,
+          },
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+
+      const { access_token } = response.data;
+
+      // Сохраняем access_token в базу (например, в пользователя)
+      const user = await strapi.entityService.create("api::user.user", {
+        data: { pinterest_token: access_token },
+      });
+
+      return ctx.send({ message: "Authenticated", user });
+    } catch (error) {
+      console.error(
+        "Pinterest Auth Error:",
+        error.response ? error.response.data : error.message
+      );
+      return ctx.internalServerError("Failed to authenticate");
+    }
+  },
+
   async searchPins(ctx) {
     // Получение параметра query из запроса
     const { query } = ctx.request.query;
