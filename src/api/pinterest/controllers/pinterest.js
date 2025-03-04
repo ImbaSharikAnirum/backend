@@ -13,7 +13,7 @@ module.exports = {
       const response = await axios.post(
         "https://api.pinterest.com/v5/oauth/token",
         querystring.stringify({
-          code,
+          code: code,
           client_id: process.env.PINTEREST_CLIENT_ID,
           client_secret: process.env.PINTEREST_CLIENT_SECRET,
           redirect_uri: process.env.PINTEREST_REDIRECT_URI,
@@ -33,6 +33,11 @@ module.exports = {
         ctx.badRequest("Токен не получен");
       }
     } catch (error) {
+      console.error(
+        "Ошибка при получении токена: ",
+        error.response ? error.response.data : error.message
+      );
+
       ctx.internalServerError("Ошибка при получении токена", error);
     }
   },
