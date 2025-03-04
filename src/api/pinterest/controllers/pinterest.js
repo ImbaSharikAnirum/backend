@@ -9,24 +9,33 @@ module.exports = {
     }
     console.log(code, "code");
     try {
+      // Формируем данные для POST-запроса, используя код авторизации
+      const data = new URLSearchParams();
+      data.append("grant_type", "authorization_code");
+      data.append("client_id", process.env.PINTEREST_CLIENT_ID);
+      data.append("client_secret", process.env.PINTEREST_CLIENT_SECRET);
+      data.append("code", code);
+      data.append("redirect_uri", process.env.PINTEREST_REDIRECT_URI);
+
+      // Отправляем запрос на получение токена
       const response = await axios.post(
         "https://api.pinterest.com/v5/oauth/token",
-        null,
+        data, // Отправляем данные в теле запроса
         {
-          params: {
-            grant_type: "authorization_code",
-            client_id: process.env.PINTEREST_CLIENT_ID,
-            client_secret: process.env.PINTEREST_CLIENT_SECRET,
-            code,
-            redirect_uri: process.env.PINTEREST_REDIRECT_URI,
-          },
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/x-www-form-urlencoded", // Указываем правильный Content-Type
           },
         }
       );
+
       console.log(response.data, "response");
+
+      // Извлекаем access_token из ответа
       const { access_token } = response.data;
+
+      if (!access_token) {
+        return ctx.badRequest("Failed to retrieve access token");
+      }
 
       // Допустим, у вас есть идентификатор пользователя (например, в cookies или через запрос)
       const userId = ctx.state.user.id; // или извлекайте идентификатор пользователя через другую логику
