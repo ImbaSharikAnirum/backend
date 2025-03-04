@@ -104,6 +104,9 @@
       "relation": "oneToMany",
       "target": "api::student.student",
       "mappedBy": "users_permissions_user"
+    },
+    "pinterest_token": {
+      "type": "text"
     }
   }
 }
