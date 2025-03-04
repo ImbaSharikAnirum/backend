@@ -25,7 +25,7 @@ module.exports = {
           },
         }
       );
-
+      console.log(response, "response");
       const { access_token } = response.data;
       if (access_token) {
         ctx.send({ access_token });
