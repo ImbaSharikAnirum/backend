@@ -10,18 +10,21 @@ module.exports = {
     }
     console.log(code, "code");
     try {
+      const authHeader = Buffer.from(
+        `${process.env.PINTEREST_CLIENT_ID}:${process.env.PINTEREST_CLIENT_SECRET}`
+      ).toString("base64");
+
       const response = await axios.post(
         "https://api.pinterest.com/v5/oauth/token",
         querystring.stringify({
           code: code,
-          client_id: process.env.PINTEREST_CLIENT_ID,
-          client_secret: process.env.PINTEREST_CLIENT_SECRET,
           redirect_uri: process.env.PINTEREST_REDIRECT_URI,
           grant_type: "authorization_code",
         }),
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Basic ${authHeader}`,
           },
         }
       );
