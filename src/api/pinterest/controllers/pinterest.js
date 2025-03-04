@@ -12,11 +12,14 @@ module.exports = {
       // Отправка запроса на получение токена доступа от Pinterest
       const response = await axios.post(
         "https://api.pinterest.com/v1/oauth/access_token",
+        null,
         {
-          client_id: `${process.env.PINTEREST_CLIENT_ID}`, // Замените на ваш client_id
-          client_secret: `${process.env.PINTEREST_CLIENT_SECRET}`, // Замените на ваш client_secret
-          code: code,
-          redirect_uri: `${process.env.PINTEREST_REDIRECT_URI}`, // Замените на ваш redirect_uri
+          params: {
+            code: code,
+            client_id: process.env.PINTEREST_CLIENT_ID,
+            client_secret: process.env.PINTEREST_CLIENT_SECRET,
+            redirect_uri: process.env.PINTEREST_REDIRECT_URI,
+          },
         }
       );
 
