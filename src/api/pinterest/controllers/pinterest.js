@@ -15,10 +15,11 @@ module.exports = {
         {
           params: {
             grant_type: "authorization_code",
-            client_id: process.env.PINTEREST_CLIENT_ID,
-            client_secret: process.env.PINTEREST_CLIENT_SECRET,
+            // client_id: process.env.PINTEREST_CLIENT_ID,
+            // client_secret: process.env.PINTEREST_CLIENT_SECRET,
             code: code,
             redirect_uri: process.env.PINTEREST_REDIRECT_URI,
+            continuous_refresh: false,
           },
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
