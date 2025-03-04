@@ -9,45 +9,28 @@ module.exports = {
     }
     console.log(code, "code");
     try {
+      // Отправка запроса на получение токена доступа от Pinterest
       const response = await axios.post(
-        "https://api.pinterest.com/v5/oauth/token",
-        null,
+        "https://api.pinterest.com/v1/oauth/access_token",
         {
-          params: {
-            grant_type: "authorization_code",
-            // client_id: process.env.PINTEREST_CLIENT_ID,
-            // client_secret: process.env.PINTEREST_CLIENT_SECRET,
-            code: code,
-            redirect_uri: process.env.PINTEREST_REDIRECT_URI,
-            continuous_refresh: false,
-          },
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
+          client_id: `${process.env.PINTEREST_CLIENT_ID}`, // Замените на ваш client_id
+          client_secret: `${process.env.PINTEREST_CLIENT_SECRET}`, // Замените на ваш client_secret
+          code: code,
+          redirect_uri: `${process.env.PINTEREST_REDIRECT_URI}`, // Замените на ваш redirect_uri
         }
       );
-      console.log(response.data, "response");
+
       const { access_token } = response.data;
-
-      // Допустим, у вас есть идентификатор пользователя (например, в cookies или через запрос)
-      const userId = ctx.state.user.id; // или извлекайте идентификатор пользователя через другую логику
-
-      // Обновляем пользователя с новым токеном
-      const user = await strapi.entityService.update("api::user.user", userId, {
-        data: { pinterest_token: access_token }, // Сохраняем токен
-      });
-
-      return ctx.send({
-        message: "Authenticated and token saved successfully",
-        user,
-        access_token,
-      });
+      console.log(response.data, "response");
+      if (access_token) {
+        // Сохраните токен в базе данных или в другом безопасном месте
+        // Например, в переменной сессии или отправьте обратно на фронтенд
+        ctx.send({ access_token });
+      } else {
+        ctx.badRequest("Токен не получен");
+      }
     } catch (error) {
-      console.error(
-        "Pinterest Auth Error:",
-        error.response ? error.response.data : error.message
-      );
-      return ctx.internalServerError("Failed to authenticate");
+      ctx.internalServerError("Ошибка при получении токена", error);
     }
   },
 
