@@ -48,7 +48,6 @@ module.exports = {
     }
   },
   async getPins(ctx) {
-    
     const token = ctx.state.user.pinterestAccessToken; // Получаем токен пользователя
     console.log(token, "token");
     if (!token) {
@@ -56,9 +55,12 @@ module.exports = {
     }
 
     try {
-      const response = await axios.get("https://api.pinterest.com/v5/me/pins", {
+      const response = await fetch("https://api.pinterest.com/v5/pins", {
+        method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Здесь передаем сам токен
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
       });
 
