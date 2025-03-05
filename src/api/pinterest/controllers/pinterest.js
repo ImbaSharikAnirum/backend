@@ -55,10 +55,11 @@ module.exports = {
     }
 
     try {
+      const tokenBase64 = Buffer.from(`${token}`).toString("base64");
       const response = await fetch("https://api.pinterest.com/v5/pins", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`, // Здесь передаем сам токен
+          Authorization: `Bearer ${tokenBase64}`, // Здесь передаем сам токен
           "Content-Type": "application/json",
           Accept: "application/json",
         },
