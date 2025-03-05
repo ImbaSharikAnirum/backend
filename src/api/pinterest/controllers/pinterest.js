@@ -63,8 +63,11 @@ module.exports = {
           Accept: "application/json",
         },
       });
-      console.log(response, "response");
-      return ctx.send(response.data);
+
+      const data = await response.json(); // Распарсим JSON-ответ
+      console.log(data, "data"); // Распарсим JSON-ответ
+
+      return ctx.send(data);
     } catch (error) {
       console.error("Ошибка при получении пинов:", error);
       return ctx.internalServerError("Ошибка при получении пинов", error);
