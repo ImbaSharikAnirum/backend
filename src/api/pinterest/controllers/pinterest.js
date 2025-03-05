@@ -49,7 +49,7 @@ module.exports = {
   },
   async getPins(ctx) {
     const token = ctx.state.user.pinterestAccessToken; // Получаем токен пользователя
-    console.log(token, "token");
+
     if (!token) {
       return ctx.unauthorized("Token is required");
     }
@@ -63,7 +63,7 @@ module.exports = {
           Accept: "application/json",
         },
       });
-
+      console.log(response, "response");
       return ctx.send(response.data);
     } catch (error) {
       console.error("Ошибка при получении пинов:", error);
