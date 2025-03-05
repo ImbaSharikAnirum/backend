@@ -65,7 +65,6 @@ module.exports = {
       });
 
       const data = await response.json(); // Распарсим JSON-ответ
-      console.log(data, "data"); // Распарсим JSON-ответ
 
       return ctx.send(data);
     } catch (error) {
