@@ -53,6 +53,27 @@ module.exports = {
       ctx.internalServerError("Ошибка при получении токена", error);
     }
   },
+  async getPins(ctx) {
+    console.log(ctx.state.user, "ctx.state.user");
+    const token = ctx.state.user.pinterestAccessToken; // Получаем токен пользователя
+
+    if (!token) {
+      return ctx.unauthorized("Token is required");
+    }
+
+    try {
+      const response = await axios.get("https://api.pinterest.com/v5/me/pins", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return ctx.send(response.data);
+    } catch (error) {
+      console.error("Ошибка при получении пинов:", error);
+      return ctx.internalServerError("Ошибка при получении пинов", error);
+    }
+  },
 
   async searchPins(ctx) {
     // Получение параметра query из запроса

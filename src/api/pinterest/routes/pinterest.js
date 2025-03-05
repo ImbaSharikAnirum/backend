@@ -9,6 +9,14 @@ module.exports = {
       },
     },
     {
+      method: "GET",
+      path: "/pinterest/get",
+      handler: "pinterest.getPins",
+      config: {
+        policies: [],
+      },
+    },
+    {
       method: "POST",
       path: "/pinterest/auth",
       handler: "pinterest.authenticate",
