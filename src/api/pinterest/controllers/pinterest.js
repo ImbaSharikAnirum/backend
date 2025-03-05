@@ -4,9 +4,6 @@ const querystring = require("querystring");
 module.exports = {
   async authenticate(ctx) {
     const { code, userId } = ctx.request.body;
-    console.log(code, "code");
-    console.log(userId, "userId");
-    console.log(ctx.request.body, "ctx.request.body");
     if (!code || !userId) {
       return ctx.badRequest("Code is required");
     }
@@ -14,8 +11,6 @@ module.exports = {
       const authHeader = Buffer.from(
         `${process.env.PINTEREST_CLIENT_ID}:${process.env.PINTEREST_CLIENT_SECRET}`
       ).toString("base64");
-      console.log(code, "code");
-      console.log(userId, "userId");
       const response = await axios.post(
         "https://api.pinterest.com/v5/oauth/token",
         querystring.stringify({
@@ -31,7 +26,6 @@ module.exports = {
         }
       );
       const { access_token, refresh_token } = response.data;
-      console.log(response, "response");
       await strapi.entityService.update(
         "plugin::users-permissions.user",
         userId,
