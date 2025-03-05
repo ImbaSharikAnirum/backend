@@ -13,7 +13,7 @@ module.exports = {
       path: "/pinterest/get",
       handler: "pinterest.getPins",
       config: {
-        auth: true, // Указывает, что маршрут требует аутентификации
+        policies: [],
       },
     },
     {
