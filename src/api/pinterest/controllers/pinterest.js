@@ -48,9 +48,9 @@ module.exports = {
     }
   },
   async getPins(ctx) {
-    console.log(ctx.state.user, "ctx.state.user");
+    
     const token = ctx.state.user.pinterestAccessToken; // Получаем токен пользователя
-
+    console.log(token, "token");
     if (!token) {
       return ctx.unauthorized("Token is required");
     }
