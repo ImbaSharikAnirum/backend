@@ -784,7 +784,8 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       'oneToMany',
       'api::student.student'
     >;
-    pinterest_token: Attribute.Text;
+    pinterestAccessToken: Attribute.Text;
+    pinterestRefreshToken: Attribute.Text;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<

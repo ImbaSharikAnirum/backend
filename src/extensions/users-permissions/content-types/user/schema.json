@@ -105,7 +105,10 @@
       "target": "api::student.student",
       "mappedBy": "users_permissions_user"
     },
-    "pinterest_token": {
+    "pinterestAccessToken": {
+      "type": "text"
+    },
+    "pinterestRefreshToken": {
       "type": "text"
     }
   }

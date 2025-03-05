@@ -3,12 +3,11 @@ const querystring = require("querystring");
 
 module.exports = {
   async authenticate(ctx) {
-    const { code } = ctx.request.body;
+    const { code, userId } = ctx.request.body;
 
-    if (!code) {
+    if (!code || !userId) {
       return ctx.badRequest("Code is required");
     }
-    console.log(code, "code");
     try {
       const authHeader = Buffer.from(
         `${process.env.PINTEREST_CLIENT_ID}:${process.env.PINTEREST_CLIENT_SECRET}`
@@ -28,13 +27,20 @@ module.exports = {
           },
         }
       );
-      console.log(response, "response");
-      const { access_token } = response.data;
-      if (access_token) {
-        ctx.send({ access_token });
-      } else {
-        ctx.badRequest("Токен не получен");
-      }
+      const { access_token, refresh_token } = response.data;
+
+      await strapi.entityService.update(
+        "plugin::users-permissions.user",
+        userId,
+        {
+          data: {
+            pinterestAccessToken: access_token,
+            pinterestRefreshToken: refresh_token || null,
+          },
+        }
+      );
+
+      return ctx.send({ access_token, message: "Токен сохранён" });
     } catch (error) {
       console.error(
         "Ошибка при получении токена: ",
