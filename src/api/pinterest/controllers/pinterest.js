@@ -4,7 +4,9 @@ const querystring = require("querystring");
 module.exports = {
   async authenticate(ctx) {
     const { code, userId } = ctx.request.body;
-
+    console.log(code, "code");
+    console.log(userId, "userId");
+    console.log(ctx.request.body, "ctx.request.body");
     if (!code || !userId) {
       return ctx.badRequest("Code is required");
     }
