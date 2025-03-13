@@ -1,9 +1,9 @@
 module.exports = {
   routes: [
     {
-      method: "GET",
-      path: "/pinterest/search",
-      handler: "pinterest.searchPins",
+      method: "POST",
+      path: "/save-pinterest-guide",
+      handler: "pinterest.savePinterestGuide",
       config: {
         policies: [],
       },

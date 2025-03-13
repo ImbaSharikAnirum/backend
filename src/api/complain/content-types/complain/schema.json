@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "complains",
+  "info": {
+    "singularName": "complain",
+    "pluralName": "complains",
+    "displayName": "Complain"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "guide": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::guide.guide",
+      "inversedBy": "complains"
+    }
+  }
+}

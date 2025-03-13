@@ -786,6 +786,21 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
     >;
     pinterestAccessToken: Attribute.Text;
     pinterestRefreshToken: Attribute.Text;
+    guides: Attribute.Relation<
+      'plugin::users-permissions.user',
+      'oneToMany',
+      'api::guide.guide'
+    >;
+    creations: Attribute.Relation<
+      'plugin::users-permissions.user',
+      'oneToMany',
+      'api::creation.creation'
+    >;
+    savedGuides: Attribute.Relation<
+      'plugin::users-permissions.user',
+      'manyToMany',
+      'api::guide.guide'
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -905,6 +920,83 @@ export interface ApiCityCity extends Schema.CollectionType {
   };
 }
 
+export interface ApiComplainComplain extends Schema.CollectionType {
+  collectionName: 'complains';
+  info: {
+    singularName: 'complain';
+    pluralName: 'complains';
+    displayName: 'Complain';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    title: Attribute.String;
+    guide: Attribute.Relation<
+      'api::complain.complain',
+      'manyToOne',
+      'api::guide.guide'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::complain.complain',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::complain.complain',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiCreationCreation extends Schema.CollectionType {
+  collectionName: 'creations';
+  info: {
+    singularName: 'creation';
+    pluralName: 'creations';
+    displayName: 'Creation';
+    description: '';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    image: Attribute.Media;
+    guide: Attribute.Relation<
+      'api::creation.creation',
+      'manyToOne',
+      'api::guide.guide'
+    >;
+    like: Attribute.Integer;
+    users_permissions_user: Attribute.Relation<
+      'api::creation.creation',
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::creation.creation',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::creation.creation',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiDistrictDistrict extends Schema.CollectionType {
   collectionName: 'districts';
   info: {
@@ -1009,6 +1101,62 @@ export interface ApiGroupGroup extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::group.group',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiGuideGuide extends Schema.CollectionType {
+  collectionName: 'guides';
+  info: {
+    singularName: 'guide';
+    pluralName: 'guides';
+    displayName: 'Guide';
+    description: '';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    title: Attribute.String;
+    text: Attribute.Text;
+    image: Attribute.Media;
+    tags: Attribute.Text;
+    link: Attribute.String;
+    users_permissions_user: Attribute.Relation<
+      'api::guide.guide',
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    complains: Attribute.Relation<
+      'api::guide.guide',
+      'oneToMany',
+      'api::complain.complain'
+    >;
+    creations: Attribute.Relation<
+      'api::guide.guide',
+      'oneToMany',
+      'api::creation.creation'
+    >;
+    approved: Attribute.Boolean & Attribute.DefaultTo<false>;
+    savedBy: Attribute.Relation<
+      'api::guide.guide',
+      'manyToMany',
+      'plugin::users-permissions.user'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::guide.guide',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::guide.guide',
       'oneToOne',
       'admin::user'
     > &
@@ -1122,8 +1270,11 @@ declare module '@strapi/types' {
       'api::activity.activity': ApiActivityActivity;
       'api::address.address': ApiAddressAddress;
       'api::city.city': ApiCityCity;
+      'api::complain.complain': ApiComplainComplain;
+      'api::creation.creation': ApiCreationCreation;
       'api::district.district': ApiDistrictDistrict;
       'api::group.group': ApiGroupGroup;
+      'api::guide.guide': ApiGuideGuide;
       'api::invoice.invoice': ApiInvoiceInvoice;
       'api::student.student': ApiStudentStudent;
     }
