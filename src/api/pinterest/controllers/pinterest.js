@@ -53,38 +53,33 @@ module.exports = {
   },
   async getPins(ctx) {
     const token = ctx.state.user.pinterestAccessToken; // Получаем токен пользователя
-
     if (!token) {
       return ctx.unauthorized("Token is required");
     }
 
     try {
-      let allPins = [];
-      let bookmark = null;
+      // Получаем параметры пагинации из запроса
+      const pageSize = parseInt(ctx.query.page_size) || 50;
+      const bookmark = ctx.query.bookmark || "";
 
-      // Выполняем запросы, пока API возвращает bookmark
-      do {
-        const url = `https://api.pinterest.com/v5/pins/?limit=100${
-          bookmark ? `&bookmark=${bookmark}` : ""
-        }`;
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`, // Передаем токен
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        });
-        const data = await response.json();
+      const url = `https://api.pinterest.com/v5/pins?page_size=${pageSize}${
+        bookmark ? `&bookmark=${bookmark}` : ""
+      }`;
 
-        if (data && data.items && Array.isArray(data.items)) {
-          allPins = allPins.concat(data.items);
-        }
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
 
-        // Если bookmark присутствует, значит, есть следующая порция данных
-        bookmark = data.bookmark;
-      } while (bookmark);
-      console.log(`Получено ${allPins.length} пинов из Pinterest.`);
+      if (!response.ok) {
+        throw new Error(`Pinterest API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
 
       // Получаем гайды из Strapi, чтобы отметить сохранённые пины
       const guides = await strapi.entityService.findMany("api::guide.guide", {
@@ -96,21 +91,25 @@ module.exports = {
         pagination: false,
       });
 
-      // Для каждого пина добавляем флаг isSaved, если ссылка пина совпадает с сохранённым гайдом
-      const pinsWithSaved = allPins.map((pin) => {
+      // Добавляем флаг isSaved для каждого пина
+      const pinsWithSaved = data.items.map((pin) => {
         const pinLink = `https://www.pinterest.com/pin/${pin.id}/`;
         const isSaved = guides.some((guide) => guide.link === pinLink);
         return { ...pin, isSaved };
       });
 
-      // Возвращаем все пины в одном объекте
-      return ctx.send({ items: pinsWithSaved });
+      return ctx.send({
+        items: pinsWithSaved,
+        bookmark: data.bookmark || null, // Если bookmark отсутствует, значит, данные закончились
+        total: data.total || pinsWithSaved.length, // Общее количество пинов (если возвращается)
+      });
     } catch (error) {
       console.error("Ошибка при получении пинов:", error);
-      return ctx.internalServerError("Ошибка при получении пинов", error);
+      return ctx.internalServerError("Ошибка при получении пинов", {
+        error: error.message,
+      });
     }
   },
-
   async savePinterestGuide(ctx) {
     try {
       const { imageUrl, title, text, link, tags, approved } = ctx.request.body;
