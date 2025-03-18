@@ -128,6 +128,12 @@
       "relation": "manyToMany",
       "target": "api::guide.guide",
       "mappedBy": "savedBy"
+    },
+    "portfolio": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::portfolio.portfolio",
+      "mappedBy": "users_permissions_user"
     }
   }
 }

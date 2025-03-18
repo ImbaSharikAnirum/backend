@@ -801,6 +801,11 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       'manyToMany',
       'api::guide.guide'
     >;
+    portfolio: Attribute.Relation<
+      'plugin::users-permissions.user',
+      'oneToMany',
+      'api::portfolio.portfolio'
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -1211,6 +1216,42 @@ export interface ApiInvoiceInvoice extends Schema.CollectionType {
   };
 }
 
+export interface ApiPortfolioPortfolio extends Schema.CollectionType {
+  collectionName: 'portfolios';
+  info: {
+    singularName: 'portfolio';
+    pluralName: 'portfolios';
+    displayName: 'Portfolio';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    title: Attribute.String;
+    image: Attribute.Media;
+    users_permissions_user: Attribute.Relation<
+      'api::portfolio.portfolio',
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::portfolio.portfolio',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::portfolio.portfolio',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiStudentStudent extends Schema.CollectionType {
   collectionName: 'students';
   info: {
@@ -1276,6 +1317,7 @@ declare module '@strapi/types' {
       'api::group.group': ApiGroupGroup;
       'api::guide.guide': ApiGuideGuide;
       'api::invoice.invoice': ApiInvoiceInvoice;
+      'api::portfolio.portfolio': ApiPortfolioPortfolio;
       'api::student.student': ApiStudentStudent;
     }
   }
