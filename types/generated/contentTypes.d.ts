@@ -806,6 +806,16 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       'oneToMany',
       'api::portfolio.portfolio'
     >;
+    skill_trees: Attribute.Relation<
+      'plugin::users-permissions.user',
+      'oneToMany',
+      'api::skill-tree.skill-tree'
+    >;
+    savedSkillTrees: Attribute.Relation<
+      'plugin::users-permissions.user',
+      'manyToMany',
+      'api::skill-tree.skill-tree'
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -995,6 +1005,37 @@ export interface ApiCreationCreation extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::creation.creation',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiDirectionDirection extends Schema.CollectionType {
+  collectionName: 'directions';
+  info: {
+    singularName: 'direction';
+    pluralName: 'directions';
+    displayName: 'Direction';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    image: Attribute.Media;
+    title: Attribute.String;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::direction.direction',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::direction.direction',
       'oneToOne',
       'admin::user'
     > &
@@ -1252,6 +1293,80 @@ export interface ApiPortfolioPortfolio extends Schema.CollectionType {
   };
 }
 
+export interface ApiSkillSkill extends Schema.CollectionType {
+  collectionName: 'skills';
+  info: {
+    singularName: 'skill';
+    pluralName: 'skills';
+    displayName: 'Skill';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    title: Attribute.String;
+    image: Attribute.Media;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::skill.skill',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::skill.skill',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiSkillTreeSkillTree extends Schema.CollectionType {
+  collectionName: 'skill_trees';
+  info: {
+    singularName: 'skill-tree';
+    pluralName: 'skill-trees';
+    displayName: 'Skill-tree';
+    description: '';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    title: Attribute.String;
+    image: Attribute.Media;
+    treeData: Attribute.JSON;
+    author: Attribute.Relation<
+      'api::skill-tree.skill-tree',
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    savedBy: Attribute.Relation<
+      'api::skill-tree.skill-tree',
+      'manyToMany',
+      'plugin::users-permissions.user'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::skill-tree.skill-tree',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::skill-tree.skill-tree',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiStudentStudent extends Schema.CollectionType {
   collectionName: 'students';
   info: {
@@ -1313,11 +1428,14 @@ declare module '@strapi/types' {
       'api::city.city': ApiCityCity;
       'api::complain.complain': ApiComplainComplain;
       'api::creation.creation': ApiCreationCreation;
+      'api::direction.direction': ApiDirectionDirection;
       'api::district.district': ApiDistrictDistrict;
       'api::group.group': ApiGroupGroup;
       'api::guide.guide': ApiGuideGuide;
       'api::invoice.invoice': ApiInvoiceInvoice;
       'api::portfolio.portfolio': ApiPortfolioPortfolio;
+      'api::skill.skill': ApiSkillSkill;
+      'api::skill-tree.skill-tree': ApiSkillTreeSkillTree;
       'api::student.student': ApiStudentStudent;
     }
   }

@@ -134,6 +134,18 @@
       "relation": "oneToMany",
       "target": "api::portfolio.portfolio",
       "mappedBy": "users_permissions_user"
+    },
+    "skill_trees": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::skill-tree.skill-tree",
+      "mappedBy": "author"
+    },
+    "savedSkillTrees": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::skill-tree.skill-tree",
+      "mappedBy": "savedBy"
     }
   }
 }

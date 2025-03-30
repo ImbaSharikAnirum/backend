@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "skill_trees",
+  "info": {
+    "singularName": "skill-tree",
+    "pluralName": "skill-trees",
+    "displayName": "Skill-tree",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "image": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "treeData": {
+      "type": "json"
+    },
+    "author": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "skill_trees"
+    },
+    "savedBy": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "savedSkillTrees"
+    }
+  }
+}

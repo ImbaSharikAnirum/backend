@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "directions",
+  "info": {
+    "singularName": "direction",
+    "pluralName": "directions",
+    "displayName": "Direction"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "image": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": true
+    },
+    "title": {
+      "type": "string"
+    }
+  }
+}
