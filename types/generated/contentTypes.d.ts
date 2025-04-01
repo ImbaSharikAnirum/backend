@@ -1169,7 +1169,6 @@ export interface ApiGuideGuide extends Schema.CollectionType {
     title: Attribute.String;
     text: Attribute.Text;
     image: Attribute.Media;
-    tags: Attribute.Text;
     link: Attribute.String;
     users_permissions_user: Attribute.Relation<
       'api::guide.guide',
@@ -1192,6 +1191,7 @@ export interface ApiGuideGuide extends Schema.CollectionType {
       'manyToMany',
       'plugin::users-permissions.user'
     >;
+    tags: Attribute.JSON;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

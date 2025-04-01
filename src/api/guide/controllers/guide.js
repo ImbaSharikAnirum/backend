@@ -5,11 +5,24 @@
  */
 
 const { createCoreController } = require("@strapi/strapi").factories;
+const generateTagsFromImage = require("../../../utils/generateTagsFromImage");
 
 module.exports = createCoreController("api::guide.guide", ({ strapi }) => ({
   async create(ctx) {
-    const { title, text, link, tags, approved } = ctx.request.body; // Просто используем данные напрямую
+    const { title, text, link, approved } = ctx.request.body;
     const { files } = ctx.request;
+
+    let tagsRaw = ctx.request.body.tags;
+    let tags = [];
+
+    if (typeof tagsRaw === "string") {
+      // Разделяем строку тегов по запятой и пробелу
+      tags = tagsRaw
+        .split(",")
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean);
+    }
+
     try {
       let imageId = null;
 
@@ -22,29 +35,51 @@ module.exports = createCoreController("api::guide.guide", ({ strapi }) => ({
           files: files.files,
         });
 
-        imageId = uploadedFile[0].id; // Получаем ID загруженного изображения
+        imageId = uploadedFile[0].id;
       }
+
       const userId = ctx.state.user ? ctx.state.user.id : null;
-      // Создаем новый гайд с привязанным изображением, если оно есть
-      const guideData = {
-        title,
-        text,
-        link,
-        tags,
-        approved,
-        image: imageId ? imageId : null, // Если изображение загружено, привязываем его
-        users_permissions_user: userId ? { id: userId } : null,
-      };
 
+      // Создаем черновой гайд
       const newGuide = await strapi.services["api::guide.guide"].create({
-        data: guideData,
+        data: {
+          title,
+          text,
+          link,
+          tags: [],
+          approved,
+          image: imageId || null,
+          users_permissions_user: userId ? { id: userId } : null,
+        },
+        populate: { image: true },
       });
 
-      return ctx.send(newGuide);
+      // Генерация тегов по изображению (используем самое маленькое доступное)
+      const imageUrl =
+        newGuide?.image?.formats?.thumbnail?.url ||
+        newGuide?.image?.formats?.small?.url ||
+        newGuide?.image?.formats?.medium?.url ||
+        newGuide?.image?.formats?.large?.url ||
+        newGuide?.image?.url; // fallback к оригиналу
+
+      const aiTags = imageUrl ? await generateTagsFromImage(imageUrl) : [];
+
+      const combinedTags = [...new Set([...tags, ...aiTags])];
+
+      // Обновление тегов в гайде
+      const updatedGuide = await strapi.entityService.update(
+        "api::guide.guide",
+        newGuide.id,
+        {
+          data: { tags: combinedTags },
+          populate: { image: true },
+        }
+      );
+
+      return ctx.send(updatedGuide);
     } catch (error) {
-      return ctx.badRequest("Ошибка при создании гайда с изображением", {
-        error,
-      });
+      console.error("Ошибка при создании гайда:", error);
+      return ctx.badRequest("Ошибка при создании гайда", { error });
     }
   },
 }));

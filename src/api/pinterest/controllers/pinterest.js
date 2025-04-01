@@ -4,6 +4,7 @@ const streamifier = require("streamifier");
 const fs = require("fs");
 const os = require("os");
 const pathModule = require("path");
+const generateTagsFromImage = require("../../../utils/generateTagsFromImage");
 
 module.exports = {
   async authenticate(ctx) {
@@ -112,31 +113,35 @@ module.exports = {
   },
   async savePinterestGuide(ctx) {
     try {
-      const { imageUrl, title, text, link, tags, approved } = ctx.request.body;
-      let imageId = null;
-      // Загружаем изображение по URL
+      const {
+        imageUrl,
+        title,
+        text,
+        link,
+        tags = "",
+        approved,
+      } = ctx.request.body;
+
+      const tagsFromClient = Array.isArray(tags)
+        ? tags.map((t) => String(t).trim().toLowerCase())
+        : [];
+      // 1. Загрузка изображения
       const response = await axios.get(imageUrl, {
         responseType: "arraybuffer",
       });
       const buffer = Buffer.from(response.data, "binary");
-
-      // Извлекаем имя файла и MIME-тип
       const fileName = imageUrl.split("/").pop();
       const mimeType = response.headers["content-type"];
-
-      // Сохраняем буфер во временный файл
       const tmpFilePath = pathModule.join(os.tmpdir(), fileName);
       fs.writeFileSync(tmpFilePath, buffer);
 
-      // Формируем объект для загрузки с указанным путём
       const fileData = {
         name: fileName,
         type: mimeType,
         size: buffer.length,
-        path: tmpFilePath, // здесь передаем корректный путь к файлу
+        path: tmpFilePath,
       };
 
-      // Загружаем файл через плагин upload Strapi
       const uploadedFiles = await strapi.plugins[
         "upload"
       ].services.upload.upload({
@@ -147,24 +152,53 @@ module.exports = {
         },
         files: fileData,
       });
-      imageId = uploadedFiles[0].id;
-      const userId = ctx.state.user ? ctx.state.user.id : null;
-      const guideData = {
-        title,
-        text,
-        link,
-        tags,
-        image: imageId ? imageId : null, // Если изображение загружено, привязываем его
-        users_permissions_user: userId ? { id: userId } : null,
-        approved: approved,
-      };
 
-      // Если хотите протестировать, просто отправьте ответ
+      const imageId = uploadedFiles[0].id;
+
+      // 2. Сохраняем гайд без тегов
+      const userId = ctx.state.user ? ctx.state.user.id : null;
       const newGuide = await strapi.services["api::guide.guide"].create({
-        data: guideData,
+        data: {
+          title,
+          text,
+          link,
+          tags: [],
+          image: imageId,
+          users_permissions_user: userId ? { id: userId } : null,
+          approved,
+        },
+        populate: { image: true },
       });
 
-      return ctx.send(newGuide);
+      // 3. Генерация тегов
+      const generatedImageUrl =
+        newGuide?.image?.formats?.thumbnail?.url ||
+        newGuide?.image?.formats?.medium?.url ||
+        newGuide?.image?.url;
+      const aiTags = generatedImageUrl
+        ? await generateTagsFromImage(generatedImageUrl)
+        : [];
+
+      // 4. Получаем текущие теги из гайда и дополняем их
+      const existingTags = Array.isArray(newGuide.tags)
+        ? newGuide.tags.map((t) => t.trim().toLowerCase())
+        : [];
+
+      const combinedTags = [
+        ...new Set([...existingTags, ...tagsFromClient, ...aiTags]),
+      ];
+
+      // 5. Обновляем гайд с объединёнными тегами
+      const updatedGuide = await strapi.entityService.update(
+        "api::guide.guide",
+        newGuide.id,
+        {
+          data: { tags: combinedTags },
+          populate: { image: true },
+        }
+      );
+
+      return ctx.send(updatedGuide);
     } catch (error) {
       console.error(error);
       ctx.throw(500, error);

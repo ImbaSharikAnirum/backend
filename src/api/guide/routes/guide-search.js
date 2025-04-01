@@ -1,20 +1,12 @@
-"use strict";
-
-/**
- * guide router
- */
-
-const { createCoreRouter } = require("@strapi/strapi").factories;
-
-module.exports = createCoreRouter("api::guide.guide", {
+module.exports = {
   routes: [
     {
       method: "POST",
       path: "/guides/search-by-text",
-      handler: "guide.searchByText",
+      handler: "guide-search.searchByText",
       config: {
         auth: false, // если хочешь, можешь включить авторизацию
       },
     },
   ],
-});
+};

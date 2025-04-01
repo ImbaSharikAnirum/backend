@@ -29,9 +29,6 @@
         "audios"
       ]
     },
-    "tags": {
-      "type": "text"
-    },
     "link": {
       "type": "string"
     },
@@ -62,6 +59,9 @@
       "relation": "manyToMany",
       "target": "plugin::users-permissions.user",
       "inversedBy": "savedGuides"
+    },
+    "tags": {
+      "type": "json"
     }
   }
 }
