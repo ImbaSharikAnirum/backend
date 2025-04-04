@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "messages",
+  "info": {
+    "singularName": "message",
+    "pluralName": "messages",
+    "displayName": "Message"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "chat": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::chat.chat",
+      "inversedBy": "messages"
+    },
+    "direction": {
+      "type": "enumeration",
+      "enum": [
+        "incoming",
+        "outgoing"
+      ]
+    },
+    "senderName": {
+      "type": "string"
+    },
+    "text": {
+      "type": "text"
+    },
+    "mediaUrl": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "datetime"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "sent",
+        "delivered",
+        "read"
+      ]
+    }
+  }
+}

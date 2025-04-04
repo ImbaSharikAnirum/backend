@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "chats",
+  "info": {
+    "singularName": "chat",
+    "pluralName": "chats",
+    "displayName": "Chat"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "contact": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::contact.contact",
+      "inversedBy": "chats"
+    },
+    "shannel": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::shannel.shannel",
+      "inversedBy": "chats"
+    },
+    "chatId": {
+      "type": "string"
+    },
+    "lastMessage": {
+      "type": "datetime"
+    },
+    "messages": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::message.message",
+      "mappedBy": "chat"
+    }
+  }
+}

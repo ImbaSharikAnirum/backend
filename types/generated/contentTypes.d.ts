@@ -908,6 +908,44 @@ export interface ApiAddressAddress extends Schema.CollectionType {
   };
 }
 
+export interface ApiChatChat extends Schema.CollectionType {
+  collectionName: 'chats';
+  info: {
+    singularName: 'chat';
+    pluralName: 'chats';
+    displayName: 'Chat';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    contact: Attribute.Relation<
+      'api::chat.chat',
+      'manyToOne',
+      'api::contact.contact'
+    >;
+    shannel: Attribute.Relation<
+      'api::chat.chat',
+      'manyToOne',
+      'api::shannel.shannel'
+    >;
+    chatId: Attribute.String;
+    lastMessage: Attribute.DateTime;
+    messages: Attribute.Relation<
+      'api::chat.chat',
+      'oneToMany',
+      'api::message.message'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<'api::chat.chat', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<'api::chat.chat', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+  };
+}
+
 export interface ApiCityCity extends Schema.CollectionType {
   collectionName: 'cities';
   info: {
@@ -963,6 +1001,44 @@ export interface ApiComplainComplain extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::complain.complain',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiContactContact extends Schema.CollectionType {
+  collectionName: 'contacts';
+  info: {
+    singularName: 'contact';
+    pluralName: 'contacts';
+    displayName: 'Contact';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    name: Attribute.String;
+    phone: Attribute.String;
+    email: Attribute.Email;
+    notes: Attribute.Text;
+    chats: Attribute.Relation<
+      'api::contact.contact',
+      'oneToMany',
+      'api::chat.chat'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::contact.contact',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::contact.contact',
       'oneToOne',
       'admin::user'
     > &
@@ -1257,6 +1333,46 @@ export interface ApiInvoiceInvoice extends Schema.CollectionType {
   };
 }
 
+export interface ApiMessageMessage extends Schema.CollectionType {
+  collectionName: 'messages';
+  info: {
+    singularName: 'message';
+    pluralName: 'messages';
+    displayName: 'Message';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    chat: Attribute.Relation<
+      'api::message.message',
+      'manyToOne',
+      'api::chat.chat'
+    >;
+    direction: Attribute.Enumeration<['incoming', 'outgoing']>;
+    senderName: Attribute.String;
+    text: Attribute.Text;
+    mediaUrl: Attribute.String;
+    timestamp: Attribute.DateTime;
+    status: Attribute.Enumeration<['sent', 'delivered', 'read']>;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::message.message',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::message.message',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiPortfolioPortfolio extends Schema.CollectionType {
   collectionName: 'portfolios';
   info: {
@@ -1286,6 +1402,47 @@ export interface ApiPortfolioPortfolio extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::portfolio.portfolio',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiShannelShannel extends Schema.CollectionType {
+  collectionName: 'shannels';
+  info: {
+    singularName: 'shannel';
+    pluralName: 'shannels';
+    displayName: '\u0421hannel';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    type: Attribute.Enumeration<['whatsapp', 'telegram', 'vk', 'instagram']>;
+    name: Attribute.String;
+    phoneNumber: Attribute.String;
+    externalId: Attribute.String;
+    chatPrefix: Attribute.String;
+    active: Attribute.Boolean & Attribute.DefaultTo<true>;
+    description: Attribute.Text;
+    chats: Attribute.Relation<
+      'api::shannel.shannel',
+      'oneToMany',
+      'api::chat.chat'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::shannel.shannel',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::shannel.shannel',
       'oneToOne',
       'admin::user'
     > &
@@ -1425,15 +1582,19 @@ declare module '@strapi/types' {
       'plugin::users-permissions.user': PluginUsersPermissionsUser;
       'api::activity.activity': ApiActivityActivity;
       'api::address.address': ApiAddressAddress;
+      'api::chat.chat': ApiChatChat;
       'api::city.city': ApiCityCity;
       'api::complain.complain': ApiComplainComplain;
+      'api::contact.contact': ApiContactContact;
       'api::creation.creation': ApiCreationCreation;
       'api::direction.direction': ApiDirectionDirection;
       'api::district.district': ApiDistrictDistrict;
       'api::group.group': ApiGroupGroup;
       'api::guide.guide': ApiGuideGuide;
       'api::invoice.invoice': ApiInvoiceInvoice;
+      'api::message.message': ApiMessageMessage;
       'api::portfolio.portfolio': ApiPortfolioPortfolio;
+      'api::shannel.shannel': ApiShannelShannel;
       'api::skill.skill': ApiSkillSkill;
       'api::skill-tree.skill-tree': ApiSkillTreeSkillTree;
       'api::student.student': ApiStudentStudent;

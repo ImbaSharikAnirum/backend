@@ -1,0 +1,49 @@
+{
+  "kind": "collectionType",
+  "collectionName": "shannels",
+  "info": {
+    "singularName": "shannel",
+    "pluralName": "shannels",
+    "displayName": "Сhannel"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "whatsapp",
+        "telegram",
+        "vk",
+        "instagram"
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "externalId": {
+      "type": "string"
+    },
+    "chatPrefix": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "chats": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::chat.chat",
+      "mappedBy": "shannel"
+    }
+  }
+}
