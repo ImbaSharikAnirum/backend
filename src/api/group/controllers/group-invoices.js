@@ -4,20 +4,41 @@ module.exports = {
   async generateInvoice(ctx) {
     const { courseId, month, nextMonth } = ctx.request.body;
 
+    console.log("Получены данные:", {
+      courseId,
+      currentMonth: month,
+      nextMonth,
+    });
+
     try {
-      // Запрос к API Strapi для получения счетов
-      const invoices = await strapi.entityService.findMany(
+      // Получаем счета за текущий месяц
+      const currentMonthInvoices = await strapi.entityService.findMany(
         "api::invoice.invoice",
         {
           filters: {
             group: courseId,
-            start_day: { $lte: month?.endOfMonth }, // start_day <= endOfMonth
-            end_day: { $gte: month?.startOfMonth }, // end_day >= startOfMonth
+            $and: [
+              {
+                start_day: {
+                  $gte: month.startOfMonth,
+                  $lte: month.endOfMonth,
+                },
+              },
+            ],
           },
+          populate: ["group"],
         }
       );
 
-      const copiedInvoices = invoices.map(
+      console.log("Найдены счета за текущий месяц:", currentMonthInvoices);
+
+      if (!currentMonthInvoices || currentMonthInvoices.length === 0) {
+        ctx.throw(404, "Не найдены счета за текущий месяц");
+        return;
+      }
+
+      // Создаем копии счетов на следующий месяц
+      const copiedInvoices = currentMonthInvoices.map(
         ({ name, family, phone, currency }) => ({
           name,
           family,
@@ -25,23 +46,33 @@ module.exports = {
           currency,
           group: courseId,
           status_payment: false,
-          start_day: nextMonth?.startDayOfMonth,
-          end_day: nextMonth?.endDayOfMonth,
-          sum: nextMonth?.sum,
+          start_day: nextMonth.startDayOfMonth,
+          end_day: nextMonth.endDayOfMonth,
+          sum: nextMonth.sum,
           publishedAt: new Date(),
         })
       );
 
+      console.log("Подготовлены счета на следующий месяц:", copiedInvoices);
+
       const createdInvoices = await Promise.all(
         copiedInvoices.map((invoice) =>
-          strapi.entityService.create("api::invoice.invoice", { data: invoice })
+          strapi.entityService.create("api::invoice.invoice", {
+            data: invoice,
+          })
         )
       );
 
-      ctx.send({ message: "Копии инвойсов созданы", copiedInvoices });
+      console.log("Созданы новые счета:", createdInvoices);
+
+      ctx.send({
+        message: "Счета на следующий месяц успешно созданы",
+        count: createdInvoices.length,
+        invoices: createdInvoices,
+      });
     } catch (error) {
-      console.error("Ошибка при получении инвойсов:", error);
-      ctx.send({ error: "Ошибка при обработке запроса" }, 500);
+      console.error("Ошибка при создании счетов:", error);
+      ctx.throw(500, "Ошибка при обработке запроса");
     }
   },
 };

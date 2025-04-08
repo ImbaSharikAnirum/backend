@@ -4,7 +4,8 @@
   "info": {
     "singularName": "chat",
     "pluralName": "chats",
-    "displayName": "Chat"
+    "displayName": "Chat",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -34,6 +35,10 @@
       "relation": "oneToMany",
       "target": "api::message.message",
       "mappedBy": "chat"
+    },
+    "isClosed": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

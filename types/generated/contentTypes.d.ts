@@ -914,6 +914,7 @@ export interface ApiChatChat extends Schema.CollectionType {
     singularName: 'chat';
     pluralName: 'chats';
     displayName: 'Chat';
+    description: '';
   };
   options: {
     draftAndPublish: true;
@@ -936,6 +937,7 @@ export interface ApiChatChat extends Schema.CollectionType {
       'oneToMany',
       'api::message.message'
     >;
+    isClosed: Attribute.Boolean & Attribute.DefaultTo<false>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
@@ -1339,6 +1341,7 @@ export interface ApiMessageMessage extends Schema.CollectionType {
     singularName: 'message';
     pluralName: 'messages';
     displayName: 'Message';
+    description: '';
   };
   options: {
     draftAndPublish: true;
@@ -1355,6 +1358,9 @@ export interface ApiMessageMessage extends Schema.CollectionType {
     mediaUrl: Attribute.String;
     timestamp: Attribute.DateTime;
     status: Attribute.Enumeration<['sent', 'delivered', 'read']>;
+    emoji: Attribute.String;
+    messageId: Attribute.String;
+    reactionToMessageId: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

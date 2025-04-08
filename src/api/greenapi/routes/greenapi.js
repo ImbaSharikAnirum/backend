@@ -8,13 +8,5 @@ module.exports = {
         policies: [],
       },
     },
-    {
-      method: "POST",
-      path: "/greenapi/send",
-      handler: "greenapi.send",
-      config: {
-        policies: [],
-      },
-    },
   ],
 };

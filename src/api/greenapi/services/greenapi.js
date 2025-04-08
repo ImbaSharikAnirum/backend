@@ -25,11 +25,12 @@ module.exports = {
           contact: contactId,
           shannel: shannelId,
           lastMessage: timestamp,
+          isClosed: false,
           publishedAt: new Date().toISOString(),
         },
       });
 
-      // 🛠 Добавляем связь в массив shannel.chats вручную
+      // Добавляем связь в shannel.chats
       if (shannelId) {
         await strapi.db.query("api::shannel.shannel").update({
           where: { id: shannelId },
@@ -46,6 +47,7 @@ module.exports = {
 
     return { chat, isNew: false };
   },
+
   async saveMessage({
     chatId,
     direction,
@@ -53,6 +55,7 @@ module.exports = {
     text,
     timestamp,
     status,
+    emoji,
   }) {
     return strapi.db.query("api::message.message").create({
       data: {
@@ -60,13 +63,15 @@ module.exports = {
         direction,
         senderName,
         text,
+        emoji,
         timestamp,
         status,
+        messageId, // ✅ сохраняем ID сообщения
+        reactionToMessageId, // ✅ если есть — сохраняем ссылку на сообщение
         publishedAt: new Date().toISOString(),
       },
     });
   },
-
   getGreenApiConfig(externalId) {
     const MAP = {
       "greenapi-01": {
@@ -80,11 +85,38 @@ module.exports = {
 
   async sendToGreenApi({ config, chatId, message }) {
     const url = `https://${config.apiUrl}/waInstance${config.idInstance}/sendMessage/${config.apiTokenInstance}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chatId, message }),
-    });
-    return res.json();
+
+
+    // Форматируем chatId для WhatsApp
+    const formattedChatId = chatId.endsWith("@c.us")
+      ? chatId
+      : `${chatId}@c.us`;
+
+    const payload = {
+      chatId: formattedChatId,
+      message: message,
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          `Green API error: ${responseData.message || "Unknown error"}`
+        );
+      }
+
+      return responseData;
+    } catch (error) {
+      throw error;
+    }
   },
 };
