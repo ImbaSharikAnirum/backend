@@ -16,8 +16,8 @@ module.exports = {
 
     // 📦 Общие данные
     const chatId = body.senderData?.chatId;
-    const phone = body.senderData?.sender;
-    const senderName = body.senderData?.senderName;
+    const phone = body.senderData?.sender?.replace("@c.us", "");
+    const senderName = body.senderData?.senderName || "Без имени";
     const timestamp = dayjs.unix(body.timestamp).toISOString();
     const messageId = body.idMessage;
 
@@ -30,12 +30,20 @@ module.exports = {
       text = body.messageData?.textMessageData?.textMessage || "";
     } else if (typeMessage === "reactionMessage") {
       emoji =
-        body.messageData?.reactionMessageData?.emoji || // старый формат
-        body.messageData?.extendedTextMessageData?.text || // новый формат
+        body.messageData?.reactionMessageData?.emoji ||
+        body.messageData?.extendedTextMessageData?.text ||
         "❤️";
       reactionToMessageId = body.messageData?.quotedMessage?.stanzaId || null;
     } else if (typeMessage === "imageMessage") {
       mediaUrl = body.messageData?.fileMessageData?.downloadUrl || null;
+      text = body.messageData?.fileMessageData?.caption || "";
+    } else if (typeMessage === "documentMessage") {
+      text = body.messageData?.fileMessageData?.caption || "";
+      mediaUrl = body.messageData?.fileMessageData?.downloadUrl || null;
+    } else if (typeMessage === "quotedMessage") {
+      reactionToMessageId =
+        body.messageData?.quotedMessage?.stanzaId || null;
+      text = body.messageData?.extendedTextMessageData?.text || "";
     } else {
       return ctx.send({ status: "ignored-type" });
     }
@@ -54,11 +62,29 @@ module.exports = {
     });
 
     try {
-      // 👤 Контакт
-      const contact = await greenapiService.findOrCreateContact({
+      // 👤 Контакт (создастся с avatarUrl и name, если нет)
+      let contact = await greenapiService.findOrCreateContact({
         phone,
         name: senderName,
       });
+
+      // 🔄 Если контакт есть, но avatarUrl не установлен — пробуем обновить
+      if (!contact.avatarUrl) {
+        const config = greenapiService.getGreenApiConfig("greenapi-01");
+        const contactInfo = await greenapiService.getContactInfo({
+          config,
+          chatId,
+        });
+
+        if (contactInfo.avatarUrl) {
+          await strapi.db.query("api::contact.contact").update({
+            where: { id: contact.id },
+            data: { avatarUrl: contactInfo.avatarUrl },
+          });
+          contact.avatarUrl = contactInfo.avatarUrl;
+          console.log("🔄 Аватар обновлён вручную:", contact.avatarUrl);
+        }
+      }
 
       // 📱 Канал (shannel)
       const shannel = await strapi.db.query("api::shannel.shannel").findOne({
@@ -98,7 +124,7 @@ module.exports = {
         data: { lastMessage: timestamp, isClosed: false },
       });
 
-      // 🌱 Если чат новый — шлем full info
+      // 🌱 Если чат новый — отправляем full info
       if (isNew) {
         const fullChat = await strapi.entityService.findOne(
           "api::chat.chat",
@@ -116,7 +142,7 @@ module.exports = {
           id: fullChat.id,
           chatId: fullChat.chatId,
           name: fullChat.contact?.name || "Без имени",
-          avatar: fullChat.contact?.avatar || "#f44336",
+          avatar: fullChat.contact?.avatarUrl || "#f44336",
           isClosed: fullChat.isClosed,
           time: fullChat.lastMessage,
           lastMessage: {
@@ -128,7 +154,7 @@ module.exports = {
         });
       }
 
-      // 📡 Отправляем в сокет
+      // 📡 Отправляем сообщение в сокет
       strapi.io.emit("chat:message", {
         chatId,
         direction: "incoming",
@@ -143,7 +169,7 @@ module.exports = {
 
       ctx.send({ status: "received" });
     } catch (error) {
-      console.error("❌ Ошибка при обработке:", error);
+      console.error("❌ Ошибка при обработке входящего сообщения:", error);
       ctx.throw(500, error);
     }
   },

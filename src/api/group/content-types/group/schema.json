@@ -93,24 +93,6 @@
     "price_lesson": {
       "type": "biginteger"
     },
-    "district": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::district.district",
-      "inversedBy": "groups"
-    },
-    "city": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::city.city",
-      "inversedBy": "groups"
-    },
-    "address": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::address.address",
-      "inversedBy": "groups"
-    },
     "start_time_moscow": {
       "type": "time"
     },
@@ -132,6 +114,63 @@
       "relation": "oneToMany",
       "target": "api::invoice.invoice",
       "mappedBy": "group"
+    },
+    "administrativeArea_en": {
+      "type": "string"
+    },
+    "administrativeArea_original_language": {
+      "type": "string"
+    },
+    "city_en": {
+      "type": "string"
+    },
+    "city_original_language": {
+      "type": "string"
+    },
+    "country_en": {
+      "type": "string"
+    },
+    "country_original_language": {
+      "type": "string"
+    },
+    "district_en": {
+      "type": "string"
+    },
+    "district_original_language": {
+      "type": "string"
+    },
+    "name_en": {
+      "type": "string"
+    },
+    "name_original_language": {
+      "type": "string"
+    },
+    "original_language": {
+      "type": "string"
+    },
+    "route_en": {
+      "type": "string"
+    },
+    "route_original_language": {
+      "type": "string"
+    },
+    "streetNumber_en": {
+      "type": "string"
+    },
+    "streetNumber_original_language": {
+      "type": "string"
+    },
+    "lat": {
+      "type": "string"
+    },
+    "lng": {
+      "type": "string"
+    },
+    "course_type": {
+      "type": "string"
+    },
+    "display_location_name": {
+      "type": "string"
     }
   }
 }

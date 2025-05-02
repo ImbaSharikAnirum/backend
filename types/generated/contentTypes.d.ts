@@ -870,44 +870,6 @@ export interface ApiActivityActivity extends Schema.CollectionType {
   };
 }
 
-export interface ApiAddressAddress extends Schema.CollectionType {
-  collectionName: 'addresses';
-  info: {
-    singularName: 'address';
-    pluralName: 'addresses';
-    displayName: 'Address';
-    description: '';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    title: Attribute.String;
-    groups: Attribute.Relation<
-      'api::address.address',
-      'oneToMany',
-      'api::group.group'
-    >;
-    lat: Attribute.String;
-    lng: Attribute.String;
-    createdAt: Attribute.DateTime;
-    updatedAt: Attribute.DateTime;
-    publishedAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<
-      'api::address.address',
-      'oneToOne',
-      'admin::user'
-    > &
-      Attribute.Private;
-    updatedBy: Attribute.Relation<
-      'api::address.address',
-      'oneToOne',
-      'admin::user'
-    > &
-      Attribute.Private;
-  };
-}
-
 export interface ApiChatChat extends Schema.CollectionType {
   collectionName: 'chats';
   info: {
@@ -944,33 +906,6 @@ export interface ApiChatChat extends Schema.CollectionType {
     createdBy: Attribute.Relation<'api::chat.chat', 'oneToOne', 'admin::user'> &
       Attribute.Private;
     updatedBy: Attribute.Relation<'api::chat.chat', 'oneToOne', 'admin::user'> &
-      Attribute.Private;
-  };
-}
-
-export interface ApiCityCity extends Schema.CollectionType {
-  collectionName: 'cities';
-  info: {
-    singularName: 'city';
-    pluralName: 'cities';
-    displayName: 'City';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    title: Attribute.String;
-    groups: Attribute.Relation<
-      'api::city.city',
-      'oneToMany',
-      'api::group.group'
-    >;
-    createdAt: Attribute.DateTime;
-    updatedAt: Attribute.DateTime;
-    publishedAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<'api::city.city', 'oneToOne', 'admin::user'> &
-      Attribute.Private;
-    updatedBy: Attribute.Relation<'api::city.city', 'oneToOne', 'admin::user'> &
       Attribute.Private;
   };
 }
@@ -1016,6 +951,7 @@ export interface ApiContactContact extends Schema.CollectionType {
     singularName: 'contact';
     pluralName: 'contacts';
     displayName: 'Contact';
+    description: '';
   };
   options: {
     draftAndPublish: true;
@@ -1030,6 +966,7 @@ export interface ApiContactContact extends Schema.CollectionType {
       'oneToMany',
       'api::chat.chat'
     >;
+    avatarUrl: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
@@ -1090,6 +1027,48 @@ export interface ApiCreationCreation extends Schema.CollectionType {
   };
 }
 
+export interface ApiCurrencyCurrency extends Schema.CollectionType {
+  collectionName: 'currencies';
+  info: {
+    singularName: 'currency';
+    pluralName: 'currencies';
+    displayName: 'Currency';
+    description: '\u041A\u0443\u0440\u0441\u044B \u0432\u0430\u043B\u044E\u0442';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    code: Attribute.String &
+      Attribute.Required &
+      Attribute.Unique &
+      Attribute.SetMinMaxLength<{
+        maxLength: 3;
+      }>;
+    rate: Attribute.Float & Attribute.Required;
+    base: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        maxLength: 3;
+      }>;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::currency.currency',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::currency.currency',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiDirectionDirection extends Schema.CollectionType {
   collectionName: 'directions';
   info: {
@@ -1133,11 +1112,6 @@ export interface ApiDistrictDistrict extends Schema.CollectionType {
   };
   attributes: {
     title: Attribute.String;
-    groups: Attribute.Relation<
-      'api::district.district',
-      'oneToMany',
-      'api::group.group'
-    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
@@ -1193,17 +1167,6 @@ export interface ApiGroupGroup extends Schema.CollectionType {
       'plugin::users-permissions.user'
     >;
     price_lesson: Attribute.BigInteger;
-    district: Attribute.Relation<
-      'api::group.group',
-      'manyToOne',
-      'api::district.district'
-    >;
-    city: Attribute.Relation<'api::group.group', 'manyToOne', 'api::city.city'>;
-    address: Attribute.Relation<
-      'api::group.group',
-      'manyToOne',
-      'api::address.address'
-    >;
     start_time_moscow: Attribute.Time;
     language: Attribute.String;
     level: Attribute.String;
@@ -1214,6 +1177,25 @@ export interface ApiGroupGroup extends Schema.CollectionType {
       'oneToMany',
       'api::invoice.invoice'
     >;
+    administrativeArea_en: Attribute.String;
+    administrativeArea_original_language: Attribute.String;
+    city_en: Attribute.String;
+    city_original_language: Attribute.String;
+    country_en: Attribute.String;
+    country_original_language: Attribute.String;
+    district_en: Attribute.String;
+    district_original_language: Attribute.String;
+    name_en: Attribute.String;
+    name_original_language: Attribute.String;
+    original_language: Attribute.String;
+    route_en: Attribute.String;
+    route_original_language: Attribute.String;
+    streetNumber_en: Attribute.String;
+    streetNumber_original_language: Attribute.String;
+    lat: Attribute.String;
+    lng: Attribute.String;
+    course_type: Attribute.String;
+    display_location_name: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
@@ -1587,12 +1569,11 @@ declare module '@strapi/types' {
       'plugin::users-permissions.role': PluginUsersPermissionsRole;
       'plugin::users-permissions.user': PluginUsersPermissionsUser;
       'api::activity.activity': ApiActivityActivity;
-      'api::address.address': ApiAddressAddress;
       'api::chat.chat': ApiChatChat;
-      'api::city.city': ApiCityCity;
       'api::complain.complain': ApiComplainComplain;
       'api::contact.contact': ApiContactContact;
       'api::creation.creation': ApiCreationCreation;
+      'api::currency.currency': ApiCurrencyCurrency;
       'api::direction.direction': ApiDirectionDirection;
       'api::district.district': ApiDistrictDistrict;
       'api::group.group': ApiGroupGroup;

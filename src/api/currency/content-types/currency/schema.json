@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "currencies",
+  "info": {
+    "singularName": "currency",
+    "pluralName": "currencies",
+    "displayName": "Currency",
+    "description": "Курсы валют"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "code": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 3
+    },
+    "rate": {
+      "type": "float",
+      "required": true
+    },
+    "base": {
+      "type": "string",
+      "required": true,
+      "maxLength": 3
+    }
+  }
+}

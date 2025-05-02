@@ -13,12 +13,6 @@
   "attributes": {
     "title": {
       "type": "string"
-    },
-    "groups": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::group.group",
-      "mappedBy": "district"
     }
   }
 }

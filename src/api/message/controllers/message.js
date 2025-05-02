@@ -60,8 +60,6 @@ module.exports = createCoreController("api::message.message", ({ strapi }) => ({
             },
           }
         );
-
-        
       } catch (error) {
         console.error("❌ GREEN API ERROR:", error);
         throw error;
@@ -69,5 +67,33 @@ module.exports = createCoreController("api::message.message", ({ strapi }) => ({
     }
 
     return message;
+  },
+  async find(ctx) {
+    // 👉 насильно добавляем populate[chat]
+    ctx.query = {
+      ...ctx.query,
+      populate: {
+        ...ctx.query.populate,
+        chat: {
+          fields: ["chatId"],
+        },
+      },
+    };
+
+    const { data, meta } = await super.find(ctx);
+
+    const enrichedData = data.map((msg) => {
+      const chatId = msg?.attributes?.chat?.data?.attributes?.chatId || null;
+
+      return {
+        ...msg,
+        attributes: {
+          ...msg.attributes,
+          chatId, // 👈 добавляем сюда
+        },
+      };
+    });
+
+    return { data: enrichedData, meta };
   },
 }));
