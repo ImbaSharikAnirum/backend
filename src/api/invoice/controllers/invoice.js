@@ -6,8 +6,26 @@ const crypto = require("crypto");
 
 module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
   async createTinkoffPayment(ctx) {
-    const { users_permissions_user, student, group, amount, currency } =
-      ctx.request.body;
+    const {
+      users_permissions_user: userId,
+      student,
+      group,
+      amount,
+      currency,
+    } = ctx.request.body;
+
+    if (!userId) {
+      return ctx.throw(400, "User ID is required");
+    }
+
+    const user = await strapi.entityService.findOne(
+      "plugin::users-permissions.user",
+      userId
+    );
+
+    if (!user) {
+      return ctx.throw(404, "User not found");
+    }
 
     const orderId = `order_${student}_${Date.now()}`;
 
@@ -15,15 +33,15 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD;
 
     const amountInCoins = Math.round(amount * 100);
-
+    console.log("user", user);
     const requestData = {
       TerminalKey: terminalKey,
       Amount: amountInCoins,
       OrderId: orderId,
       Description: `Оплата курса, студент ${student}`,
       Customer: {
-        Email: users_permissions_user.email || "",
-        Phone: users_permissions_user.phone || "",
+        Email: user.email || "",
+        // Phone: user.phone || "",
       },
     };
 
