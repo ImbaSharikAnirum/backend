@@ -37,15 +37,31 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
 
     const amountInCoins = Math.round(amount * 100);
 
-    // Формируем объект с параметрами, которые входят в подпись
-    const dataForToken = {
+    // Формируем Receipt для чека (если нужна онлайн-касса)
+    const receipt = {
+      Email: user.email || "",
+      // Phone: user.phone || "",
+      Taxation: "usn_income", // заменить при необходимости
+      Items: [
+        {
+          Name: "Курс рисования",
+          Price: amountInCoins,
+          Quantity: 1.0,
+          Amount: amountInCoins,
+          Tax: "none",
+        },
+      ],
+    };
+
+    // Параметры для подписи (только простые значения, без вложенных объектов)
+    const paramsForToken = {
       TerminalKey: terminalKey,
       Amount: amountInCoins,
       OrderId: orderId,
       Description: `Оплата курса, студент ${student}`,
     };
 
-    // Функция для генерации токена согласно требованиям Tinkoff
+    // Функция генерации токена (SHA256)
     const signParams = (params, password) => {
       const sortedKeys = Object.keys(params).sort();
       const valuesString =
@@ -57,17 +73,18 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
         .toUpperCase();
     };
 
-    // Генерируем токен
-    const token = signParams(dataForToken, terminalPassword);
+    // Генерация токена
+    const token = signParams(paramsForToken, terminalPassword);
 
-    // Формируем финальный запрос, добавляя Customer отдельно (не в подписи)
+    // Формируем окончательный запрос
     const requestData = {
-      ...dataForToken,
+      ...paramsForToken,
       Token: token,
       Customer: {
         Email: user.email || "",
         // Phone: user.phone || "",
       },
+      Receipt: receipt,
     };
 
     try {
