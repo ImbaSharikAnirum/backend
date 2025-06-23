@@ -46,7 +46,7 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
         {
           Name: "Курс рисования",
           Price: amountInCoins,
-          Quantity: 1.0,
+          Quantity: 1,
           Amount: amountInCoins,
           Tax: "none",
         },
@@ -61,11 +61,13 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       Description: `Оплата курса, студент ${student}`,
     };
 
-    // Функция генерации токена (SHA256)
+    // Функция генерации токена (SHA256) с ключами и значениями, включая Password
     const signParams = (params, password) => {
-      const sortedKeys = Object.keys(params).sort();
-      const valuesString =
-        sortedKeys.map((key) => params[key]).join("") + password;
+      const paramsWithPassword = { ...params, Password: password };
+      const sortedKeys = Object.keys(paramsWithPassword).sort();
+      const valuesString = sortedKeys
+        .map((key) => key + paramsWithPassword[key])
+        .join("");
       return crypto
         .createHash("sha256")
         .update(valuesString)
