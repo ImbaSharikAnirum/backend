@@ -69,6 +69,12 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       OrderId: orderId,
       Description: `Оплата курса, студент ${student}`,
     };
+    const paramsForTokenArray = [
+      { TerminalKey: "MerchantTerminalKey" },
+      { Amount: "19200" },
+      { OrderId: "21090" },
+      { Description: "Подарочная карта на 1000 рублей" },
+    ];
 
     // Функция генерации токена (SHA256) с ключами и значениями, включая Password
     const signParams = (params, password) => {
@@ -106,7 +112,12 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
 
       const response = await axios.post(
         "https://securepay.tinkoff.ru/v2/Init",
-        requestData
+        requestData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       console.log("Ответ от Тинькофф:", JSON.stringify(response.data, null, 2));
