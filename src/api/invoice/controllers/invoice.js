@@ -12,6 +12,7 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       group,
       amount,
       currency,
+      invoiceId,
     } = ctx.request.body;
 
     if (!userId) {
@@ -27,7 +28,9 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       return ctx.throw(404, "User not found");
     }
 
-    const orderId = `order_${student}_${Date.now()}`;
+    const orderId = invoiceId
+      ? `order_invoice_${invoiceId}`
+      : `order_${student}_${Date.now()}`;
 
     const terminalKey = process.env.TINKOFF_TERMINAL_KEY;
     const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD;
@@ -81,6 +84,39 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     } catch (error) {
       console.error("Ошибка Tinkoff Init:", error);
       ctx.throw(500, "Ошибка сервера при создании платежа");
+    }
+  },
+  async handleTinkoffNotification(ctx) {
+    const body = ctx.request.body;
+    const { OrderId, Success, Status } = body;
+
+    console.log("🔔 Уведомление от Tinkoff:", body);
+
+    let invoiceId = null;
+    if (OrderId && OrderId.startsWith("order_invoice_")) {
+      invoiceId = OrderId.replace("order_invoice_", "");
+    }
+
+    try {
+      if (Success && Status === "CONFIRMED" && invoiceId) {
+        await strapi.entityService.update("api::invoice.invoice", invoiceId, {
+          data: {
+            status_payment: true,
+            paymentId: body.PaymentId || null,
+            paymentDate: new Date(),
+          },
+        });
+        return ctx.send({ status: "ok" });
+      } else {
+        console.log(
+          "❌ Платеж не подтвержден или не найден invoiceId:",
+          Status
+        );
+        return ctx.send({ status: "Payment not confirmed" });
+      }
+    } catch (err) {
+      console.error("Ошибка при обработке уведомления:", err);
+      return ctx.throw(500, "Ошибка на сервере при обработке уведомления");
     }
   },
 }));

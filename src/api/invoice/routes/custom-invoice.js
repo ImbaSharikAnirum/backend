@@ -10,5 +10,13 @@ module.exports = {
         auth: false,
       },
     },
+    {
+      method: "POST",
+      path: "/invoices/tinkoff/notify",
+      handler: "invoice.handleTinkoffNotification",
+      config: {
+        auth: false,
+      },
+    },
   ],
 };
