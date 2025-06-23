@@ -35,6 +35,15 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     const terminalKey = process.env.TINKOFF_TERMINAL_KEY;
     const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD;
 
+    console.log(
+      "TINKOFF_TERMINAL_KEY:",
+      `"${process.env.TINKOFF_TERMINAL_KEY}"`
+    );
+    console.log(
+      "TINKOFF_TERMINAL_PASSWORD:",
+      `"${process.env.TINKOFF_TERMINAL_PASSWORD}"`
+    );
+
     const amountInCoins = Math.round(amount * 100);
 
     // Формируем Receipt для чека (если нужна онлайн-касса)
