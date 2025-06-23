@@ -40,17 +40,25 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     };
 
     const generateToken = (params, password) => {
-      const sortedKeys = Object.keys({ ...params, Password: password }).sort();
-      const tokenString = sortedKeys
-        .map((k) => (k === "Password" ? password : params[k]))
-        .join("");
-      return crypto
+      const tokenParams = { ...params, Password: password };
+      const sortedKeys = Object.keys(tokenParams).sort();
+
+      console.log("🔐 Sorted keys for token:", sortedKeys);
+
+      const tokenString = sortedKeys.map((key) => tokenParams[key]).join("");
+
+      console.log("🔐 Token string before hash (raw):", tokenString);
+
+      const hash = crypto
         .createHash("sha256")
         .update(tokenString)
         .digest("hex")
         .toUpperCase();
-    };
 
+      console.log("🔐 Generated Token:", hash);
+
+      return hash;
+    };
     const token = generateToken(paramsForToken, terminalPassword);
 
     const requestData = {
