@@ -36,42 +36,21 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD;
 
     const amountInCoins = Math.round(amount * 100);
-    console.log("user", user);
+
+    // Формируем основной payload
     const requestData = {
       TerminalKey: terminalKey,
       Amount: amountInCoins,
       OrderId: orderId,
       Description: `Оплата курса, студент ${student}`,
-      Customer: {
-        Email: user.email || "",
-        // Phone: user.phone || "",
-      },
     };
 
-    // Удаляем пустые значения из объекта
-    Object.keys(requestData).forEach((key) => {
-      if (requestData[key] === "") {
-        delete requestData[key];
-      }
-    });
-
-    // Удаляем пустые значения из Receipt
-    if (requestData.Receipt) {
-      Object.keys(requestData.Receipt).forEach((key) => {
-        if (requestData.Receipt[key] === "") {
-          delete requestData.Receipt[key];
-        }
-      });
-    }
-
+    // Генерация подписи
     const signParams = (params, password) => {
       const sortedKeys = Object.keys(params).sort();
       const valuesString =
         sortedKeys
-          .map((key) => {
-            if (typeof params[key] === "object") return "";
-            return params[key];
-          })
+          .map((key) => (typeof params[key] === "object" ? "" : params[key]))
           .join("") + password;
       return crypto
         .createHash("sha256")
@@ -82,15 +61,23 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
 
     requestData.Sign = signParams(requestData, terminalPassword);
 
+    // Добавляем Customer отдельно (не участвует в подписи)
+    requestData.Customer = {
+      Email: user.email || "",
+      // Phone: user.phone || "",
+    };
+
     try {
       console.log(
         "Отправляем запрос в Тинькофф:",
         JSON.stringify(requestData, null, 2)
       );
+
       const response = await axios.post(
         "https://securepay.tinkoff.ru/v2/Init",
         requestData
       );
+
       console.log("Ответ от Тинькофф:", JSON.stringify(response.data, null, 2));
 
       if (response.data.Success) {
@@ -107,6 +94,8 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       ctx.throw(500, "Ошибка сервера при создании платежа");
     }
   },
+
+  // Уведомление от Tinkoff
   async handleTinkoffNotification(ctx) {
     const body = ctx.request.body;
     const { OrderId, Success, Status } = body;
