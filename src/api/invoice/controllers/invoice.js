@@ -15,18 +15,13 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       invoiceId,
     } = ctx.request.body;
 
-    if (!userId) {
-      return ctx.throw(400, "User ID is required");
-    }
+    if (!userId) return ctx.throw(400, "User ID is required");
 
     const user = await strapi.entityService.findOne(
       "plugin::users-permissions.user",
       userId
     );
-
-    if (!user) {
-      return ctx.throw(404, "User not found");
-    }
+    if (!user) return ctx.throw(404, "User not found");
 
     const orderId = invoiceId
       ? `order_invoice_${invoiceId}`
@@ -34,35 +29,9 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
 
     const terminalKey = process.env.TINKOFF_TERMINAL_KEY;
     const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD;
-
-    console.log(
-      "TINKOFF_TERMINAL_KEY:",
-      `"${process.env.TINKOFF_TERMINAL_KEY}"`
-    );
-    console.log(
-      "TINKOFF_TERMINAL_PASSWORD:",
-      `"${process.env.TINKOFF_TERMINAL_PASSWORD}"`
-    );
-
     const amountInCoins = Math.round(amount * 100);
 
-    // Формируем Receipt для чека (если нужна онлайн-касса)
-    const receipt = {
-      Email: user.email || "",
-      Phone: user.phone || "",
-      Taxation: "usn_income", // заменить при необходимости
-      Items: [
-        {
-          Name: "Курс рисования",
-          Price: amountInCoins,
-          Quantity: 1,
-          Amount: amountInCoins,
-          Tax: "none",
-        },
-      ],
-    };
-
-    // Параметры для подписи (только простые значения, без вложенных объектов)
+    // Токен генерируется строго по документации (https://www.tinkoff.ru/kassa/dev/payments/#section/Token)
     const paramsForToken = {
       TerminalKey: terminalKey,
       Amount: amountInCoins,
@@ -70,26 +39,20 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       Description: `Оплата курса, студент ${student}`,
     };
 
-    // Функция генерации токена (SHA256) с ключами и значениями, включая Password
-    const signParams = (params, password) => {
-      const paramsWithPassword = { ...params, Password: password };
-      const sortedKeys = Object.keys(paramsWithPassword).sort();
-      console.log("sortedKeys", sortedKeys);
-      const valuesString = sortedKeys
-        .map((key) => paramsWithPassword[key])
+    const generateToken = (params, password) => {
+      const sortedKeys = Object.keys({ ...params, Password: password }).sort();
+      const tokenString = sortedKeys
+        .map((k) => (k === "Password" ? password : params[k]))
         .join("");
-      console.log("valuesString", valuesString);
       return crypto
         .createHash("sha256")
-        .update(valuesString)
+        .update(tokenString)
         .digest("hex")
         .toUpperCase();
     };
 
-    // Генерация токена
-    const token = signParams(paramsForToken, terminalPassword);
+    const token = generateToken(paramsForToken, terminalPassword);
 
-    // Формируем окончательный запрос
     const requestData = {
       ...paramsForToken,
       Token: token,
@@ -97,7 +60,21 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
         Email: user.email || "",
         Phone: user.phone || "",
       },
-      Receipt: receipt,
+      // Receipt передаём, только если точно включена онлайн-касса
+      Receipt: {
+        Email: user.email || "",
+        Phone: user.phone || "",
+        Taxation: "usn_income",
+        Items: [
+          {
+            Name: "Курс рисования",
+            Price: amountInCoins,
+            Quantity: 1,
+            Amount: amountInCoins,
+            Tax: "none",
+          },
+        ],
+      },
     };
 
     try {
@@ -110,9 +87,7 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
         "https://securepay.tinkoff.ru/v2/Init",
         requestData,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
@@ -134,22 +109,20 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
   },
 
   async handleTinkoffNotification(ctx) {
-    const body = ctx.request.body;
-    const { OrderId, Success, Status } = body;
+    const { OrderId, Success, Status, PaymentId } = ctx.request.body;
 
-    console.log("🔔 Уведомление от Tinkoff:", body);
+    console.log("🔔 Уведомление от Tinkoff:", ctx.request.body);
 
-    let invoiceId = null;
-    if (OrderId && OrderId.startsWith("order_invoice_")) {
-      invoiceId = OrderId.replace("order_invoice_", "");
-    }
+    const invoiceId = OrderId?.startsWith("order_invoice_")
+      ? OrderId.replace("order_invoice_", "")
+      : null;
 
     try {
       if (Success && Status === "CONFIRMED" && invoiceId) {
         await strapi.entityService.update("api::invoice.invoice", invoiceId, {
           data: {
             status_payment: true,
-            paymentId: body.PaymentId || null,
+            paymentId: PaymentId || null,
             paymentDate: new Date(),
           },
         });
