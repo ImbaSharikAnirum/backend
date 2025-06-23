@@ -48,6 +48,22 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       },
     };
 
+    // Удаляем пустые значения из объекта
+    Object.keys(requestData).forEach((key) => {
+      if (requestData[key] === "") {
+        delete requestData[key];
+      }
+    });
+
+    // Удаляем пустые значения из Receipt
+    if (requestData.Receipt) {
+      Object.keys(requestData.Receipt).forEach((key) => {
+        if (requestData.Receipt[key] === "") {
+          delete requestData.Receipt[key];
+        }
+      });
+    }
+
     const signParams = (params, password) => {
       const sortedKeys = Object.keys(params).sort();
       const valuesString =
@@ -67,10 +83,15 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     requestData.Sign = signParams(requestData, terminalPassword);
 
     try {
+      console.log(
+        "Отправляем запрос в Тинькофф:",
+        JSON.stringify(requestData, null, 2)
+      );
       const response = await axios.post(
         "https://securepay.tinkoff.ru/v2/Init",
         requestData
       );
+      console.log("Ответ от Тинькофф:", JSON.stringify(response.data, null, 2));
 
       if (response.data.Success) {
         ctx.send({
