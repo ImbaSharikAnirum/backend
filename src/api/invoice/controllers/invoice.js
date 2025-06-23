@@ -74,9 +74,11 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     const signParams = (params, password) => {
       const paramsWithPassword = { ...params, Password: password };
       const sortedKeys = Object.keys(paramsWithPassword).sort();
+      console.log("sortedKeys", sortedKeys);
       const valuesString = sortedKeys
-        .map((key) => key + paramsWithPassword[key])
+        .map((key) => paramsWithPassword[key])
         .join("");
+      console.log("valuesString", valuesString);
       return crypto
         .createHash("sha256")
         .update(valuesString)
