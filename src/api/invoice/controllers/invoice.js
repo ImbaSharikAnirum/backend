@@ -27,11 +27,21 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       ? `order_invoice_${invoiceId}`
       : `order_${student}_${Date.now()}`;
 
-    const terminalKey = process.env.TINKOFF_TERMINAL_KEY;
-    const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD;
+    const terminalKey = process.env.TINKOFF_TERMINAL_KEY?.trim();
+    const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD?.trim();
     const amountInCoins = Math.round(amount * 100);
 
-    // Токен генерируется строго по документации (https://www.tinkoff.ru/kassa/dev/payments/#section/Token)
+    console.log(
+      "🔐 TerminalKey:",
+      `"${terminalKey}"`,
+      `length: ${terminalKey.length}`
+    );
+    console.log(
+      "🔐 TerminalPassword:",
+      `"${terminalPassword}"`,
+      `length: ${terminalPassword.length}`
+    );
+
     const paramsForToken = {
       TerminalKey: terminalKey,
       Amount: amountInCoins,
@@ -43,10 +53,9 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       const tokenParams = { ...params, Password: password };
       const sortedKeys = Object.keys(tokenParams).sort();
 
-      console.log("🔐 Sorted keys for token:", sortedKeys);
-
       const tokenString = sortedKeys.map((key) => tokenParams[key]).join("");
 
+      console.log("🔐 Sorted keys for token:", sortedKeys);
       console.log("🔐 Token string before hash (raw):", tokenString);
 
       const hash = crypto
@@ -56,9 +65,9 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
         .toUpperCase();
 
       console.log("🔐 Generated Token:", hash);
-
       return hash;
     };
+
     const token = generateToken(paramsForToken, terminalPassword);
 
     const requestData = {
@@ -68,7 +77,6 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
         Email: user.email || "",
         Phone: user.phone || "",
       },
-      // Receipt передаём, только если точно включена онлайн-касса
       Receipt: {
         Email: user.email || "",
         Phone: user.phone || "",
@@ -86,20 +94,18 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     };
 
     try {
+      const apiUrl = "https://securepay.tinkoff.ru/v2/Init";
+      console.log("📡 Отправка запроса в Tinkoff URL:", apiUrl);
+      console.log("📦 Request body:", JSON.stringify(requestData, null, 2));
+
+      const response = await axios.post(apiUrl, requestData, {
+        headers: { "Content-Type": "application/json" },
+      });
+
       console.log(
-        "Отправляем запрос в Тинькофф:",
-        JSON.stringify(requestData, null, 2)
+        "📥 Ответ от Tinkoff:",
+        JSON.stringify(response.data, null, 2)
       );
-
-      const response = await axios.post(
-        "https://securepay.tinkoff.ru/v2/Init",
-        requestData,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      console.log("Ответ от Тинькофф:", JSON.stringify(response.data, null, 2));
 
       if (response.data.Success) {
         ctx.send({
@@ -111,7 +117,10 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
         ctx.throw(400, `Ошибка создания платежа: ${response.data.Message}`);
       }
     } catch (error) {
-      console.error("Ошибка Tinkoff Init:", error);
+      console.error(
+        "❌ Ошибка Tinkoff Init:",
+        error.response?.data || error.message
+      );
       ctx.throw(500, "Ошибка сервера при создании платежа");
     }
   },
