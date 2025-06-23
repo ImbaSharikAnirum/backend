@@ -26,7 +26,6 @@ module.exports = async function generateTagsFromText(text) {
       .split(",")
       .map((tag) => tag.replace(/^['"\s]+|['"\s]+$/g, "").toLowerCase())
       .filter(Boolean);
-    console.log("📊 tags:", tags);
     return tags;
   } catch (error) {
     r;

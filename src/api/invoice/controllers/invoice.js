@@ -40,7 +40,7 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       OrderId: orderId,
       Description: `Оплата курса, студент ${student}`,
       Customer: {
-        Email: user.email || "",
+        Email: user.user.email || "",
         // Phone: user.phone || "",
       },
     };

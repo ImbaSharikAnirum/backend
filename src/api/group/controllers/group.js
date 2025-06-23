@@ -238,8 +238,6 @@ module.exports = createCoreController("api::group.group", ({ strapi }) => ({
       // Вызываем стандартный метод findOne с переданными параметрами
       const { data } = await super.findOne(ctx);
 
-      console.log("findOne response data:", data);
-
       // Конвертируем цену в выбранную валюту
       if (selectedCurrencyRate && data) {
         const originalPrice = data.attributes.price_lesson;

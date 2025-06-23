@@ -21,7 +21,6 @@ module.exports = createCoreController("api::message.message", ({ strapi }) => ({
         populate: ["shannel"],
       }
     );
-    console.log("💬 CHAT FOUND:", chatData);
 
     // Создаем сообщение
     // 1. Используем let для переменной message
