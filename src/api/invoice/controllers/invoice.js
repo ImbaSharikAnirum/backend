@@ -37,21 +37,19 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
 
     const amountInCoins = Math.round(amount * 100);
 
-    // Формируем основной payload
-    const requestData = {
+    // Формируем объект с параметрами, которые входят в подпись
+    const dataForToken = {
       TerminalKey: terminalKey,
       Amount: amountInCoins,
       OrderId: orderId,
       Description: `Оплата курса, студент ${student}`,
     };
 
-    // Генерация подписи
+    // Функция для генерации токена согласно требованиям Tinkoff
     const signParams = (params, password) => {
       const sortedKeys = Object.keys(params).sort();
       const valuesString =
-        sortedKeys
-          .map((key) => (typeof params[key] === "object" ? "" : params[key]))
-          .join("") + password;
+        sortedKeys.map((key) => params[key]).join("") + password;
       return crypto
         .createHash("sha256")
         .update(valuesString)
@@ -59,13 +57,17 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
         .toUpperCase();
     };
 
-    // Генерируем токен и добавляем его в запрос
-    requestData.Token = signParams(requestData, terminalPassword);
+    // Генерируем токен
+    const token = signParams(dataForToken, terminalPassword);
 
-    // Добавляем Customer отдельно (не участвует в подписи)
-    requestData.Customer = {
-      Email: user.email || "",
-      // Phone: user.phone || "",
+    // Формируем финальный запрос, добавляя Customer отдельно (не в подписи)
+    const requestData = {
+      ...dataForToken,
+      Token: token,
+      Customer: {
+        Email: user.email || "",
+        // Phone: user.phone || "",
+      },
     };
 
     try {
@@ -96,7 +98,6 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     }
   },
 
-  // Уведомление от Tinkoff
   async handleTinkoffNotification(ctx) {
     const body = ctx.request.body;
     const { OrderId, Success, Status } = body;
