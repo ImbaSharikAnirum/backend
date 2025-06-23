@@ -59,7 +59,8 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
         .toUpperCase();
     };
 
-    requestData.Sign = signParams(requestData, terminalPassword);
+    // Генерируем токен и добавляем его в запрос
+    requestData.Token = signParams(requestData, terminalPassword);
 
     // Добавляем Customer отдельно (не участвует в подписи)
     requestData.Customer = {
