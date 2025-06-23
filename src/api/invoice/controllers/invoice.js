@@ -46,7 +46,7 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       TerminalKey: terminalKey,
       Amount: amountInCoins,
       OrderId: orderId,
-      Description: `Оплата курса, студент ${student}`,
+      Description: `Оплата курса студент 37`,
     };
 
     const generateToken = (params, password) => {
@@ -74,12 +74,10 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       ...paramsForToken,
       Token: token,
       DATA: {
-        Email: user.email || "",
-        Phone: user.phone || "",
+        Email: user.email,
       },
       Receipt: {
-        Email: user.email || "",
-        Phone: user.phone || "",
+        Email: user.email,
         Taxation: "usn_income",
         Items: [
           {
