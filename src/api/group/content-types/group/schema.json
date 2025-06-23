@@ -171,6 +171,9 @@
     },
     "display_location_name": {
       "type": "string"
+    },
+    "currency": {
+      "type": "string"
     }
   }
 }

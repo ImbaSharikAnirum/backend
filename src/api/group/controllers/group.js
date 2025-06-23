@@ -81,6 +81,7 @@ module.exports = createCoreController("api::group.group", ({ strapi }) => ({
           items: courseData.items,
           language: courseData.language,
           price_lesson: courseData.price_lesson,
+          currency: courseData.currency,
           time_zone: courseData.time_zone,
           // Форматируем время и даты
           start_time: formatTimeForStrapi(courseData.start_time),
@@ -146,6 +147,123 @@ module.exports = createCoreController("api::group.group", ({ strapi }) => ({
     } catch (error) {
       console.error("Ошибка при создании группы:", error);
       return ctx.badRequest("Ошибка при создании группы", {
+        error: error.message,
+      });
+    }
+  },
+
+  async find(ctx) {
+    try {
+      const { currency } = ctx.query;
+
+      // Получаем все курсы валют без пагинации
+      const currencies = await strapi.entityService.findMany(
+        "api::currency.currency",
+        {
+          fields: ["code", "rate", "base"],
+          pagination: {
+            pageSize: 100,
+            page: 1,
+          },
+        }
+      );
+
+      // Находим курс для выбранной валюты
+      const selectedCurrencyRate = currencies.find((c) => c.code === currency);
+
+      // Проверяем наличие фильтров
+      if (ctx.query.filters) {
+        console.log("Применяемые фильтры:", ctx.query.filters);
+      }
+
+      // Вызываем стандартный метод find с переданными параметрами
+      const { data, meta } = await super.find(ctx);
+
+      // Конвертируем цены в выбранную валюту
+      if (selectedCurrencyRate) {
+        data.forEach((course) => {
+          const originalPrice = course.attributes.price_lesson;
+          const originalCurrency = course.attributes.currency || "RUB"; // По умолчанию RUB
+
+          // Находим курс для оригинальной валюты
+          const originalCurrencyRate = currencies.find(
+            (c) => c.code === originalCurrency
+          );
+
+          if (originalCurrencyRate) {
+            // Конвертируем цену в выбранную валюту
+            const convertedPrice =
+              (originalPrice * selectedCurrencyRate.rate) /
+              originalCurrencyRate.rate;
+            course.attributes.price_lesson = Math.ceil(convertedPrice); // Округляем вверх до целого числа
+            course.attributes.currency = currency; // Обновляем валюту
+          }
+        });
+      }
+
+      // Логируем количество найденных результатов
+      // console.log("Найдено курсов:", data.length);
+
+      return { data, meta };
+    } catch (error) {
+      console.error("Ошибка при получении групп:", error);
+      return ctx.badRequest("Ошибка при получении групп", {
+        error: error.message,
+      });
+    }
+  },
+
+  async findOne(ctx) {
+    try {
+      // console.log("findOne called with params:", ctx.params);
+      // console.log("findOne called with query:", ctx.query);
+
+      const { currency } = ctx.query;
+
+      // Получаем все курсы валют без пагинации
+      const currencies = await strapi.entityService.findMany(
+        "api::currency.currency",
+        {
+          fields: ["code", "rate", "base"],
+          pagination: {
+            pageSize: 100,
+            page: 1,
+          },
+        }
+      );
+
+      // Находим курс для выбранной валюты
+      const selectedCurrencyRate = currencies.find((c) => c.code === currency);
+
+      // Вызываем стандартный метод findOne с переданными параметрами
+      const { data } = await super.findOne(ctx);
+
+      console.log("findOne response data:", data);
+
+      // Конвертируем цену в выбранную валюту
+      if (selectedCurrencyRate && data) {
+        const originalPrice = data.attributes.price_lesson;
+        const originalCurrency = data.attributes.currency || "RUB"; // По умолчанию RUB
+
+        // Находим курс для оригинальной валюты
+        const originalCurrencyRate = currencies.find(
+          (c) => c.code === originalCurrency
+        );
+
+        if (originalCurrencyRate) {
+          // Конвертируем цену в выбранную валюту
+          const convertedPrice =
+            (originalPrice * selectedCurrencyRate.rate) /
+            originalCurrencyRate.rate;
+          data.attributes.price_lesson = Math.ceil(convertedPrice); // Округляем вверх до целого числа
+          data.attributes.currency = currency; // Обновляем валюту
+        }
+      }
+
+      return { data };
+    } catch (error) {
+      console.error("Ошибка при получении группы:", error);
+      return ctx.badRequest("Ошибка при получении группы", {
         error: error.message,
       });
     }

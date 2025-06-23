@@ -1196,6 +1196,7 @@ export interface ApiGroupGroup extends Schema.CollectionType {
     lng: Attribute.String;
     course_type: Attribute.String;
     display_location_name: Attribute.String;
+    currency: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
