@@ -49,7 +49,7 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     // Формируем Receipt для чека (если нужна онлайн-касса)
     const receipt = {
       Email: user.email || "",
-      // Phone: user.phone || "",
+      Phone: user.phone || "",
       Taxation: "usn_income", // заменить при необходимости
       Items: [
         {
@@ -69,12 +69,6 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       OrderId: orderId,
       Description: `Оплата курса, студент ${student}`,
     };
-    const paramsForTokenArray = [
-      { TerminalKey: "MerchantTerminalKey" },
-      { Amount: "19200" },
-      { OrderId: "21090" },
-      { Description: "Подарочная карта на 1000 рублей" },
-    ];
 
     // Функция генерации токена (SHA256) с ключами и значениями, включая Password
     const signParams = (params, password) => {
@@ -97,9 +91,9 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     const requestData = {
       ...paramsForToken,
       Token: token,
-      Customer: {
+      DATA: {
         Email: user.email || "",
-        // Phone: user.phone || "",
+        Phone: user.phone || "",
       },
       Receipt: receipt,
     };
