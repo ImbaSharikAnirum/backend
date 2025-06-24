@@ -68,8 +68,7 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       const hash = crypto
         .createHash("sha256")
         .update(tokenString)
-        .digest("hex")
-        .toUpperCase();
+        .digest("hex");
 
       console.log("🔐 Generated Token:", hash);
       return hash;
