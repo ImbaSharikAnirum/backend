@@ -53,7 +53,9 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       const tokenParams = { ...params, Password: password };
       const sortedKeys = Object.keys(tokenParams).sort();
 
-      const tokenString = sortedKeys.map((key) => tokenParams[key]).join("");
+      const tokenString = sortedKeys
+        .map((key) => String(tokenParams[key]))
+        .join("");
       console.log(
         "🔍 Buffer UTF-8 of token string:",
         Buffer.from(tokenString, "utf8")
@@ -71,7 +73,10 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       console.log("🔐 Generated Token:", hash);
       return hash;
     };
-
+    onsole.log(
+      "TerminalPassword (char codes):",
+      terminalPassword.split("").map((c) => c.charCodeAt(0))
+    );
     const token = generateToken(paramsForToken, terminalPassword);
 
     const requestData = {
