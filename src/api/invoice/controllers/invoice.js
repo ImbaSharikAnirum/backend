@@ -41,12 +41,13 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       `"${terminalPassword}"`,
       `length: ${terminalPassword.length}`
     );
+    const normalizeStr = (s) => s.normalize("NFC");
 
     const paramsForToken = {
       TerminalKey: terminalKey,
       Amount: amountInCoins,
-      OrderId: orderId,
-      Description: `Оплата курса`,
+      OrderId: normalizeStr(orderId),
+      Description: normalizeStr(`Оплата курса`),
     };
 
     const generateToken = (params, password) => {
