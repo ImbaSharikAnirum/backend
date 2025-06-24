@@ -27,8 +27,8 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       ? `order_invoice_${invoiceId}`
       : `order_${student}_${Date.now()}`;
 
-    const terminalKey = process.env.TINKOFF_TERMINAL_KEY?.trim();
-    const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD?.trim();
+    const terminalKey = process.env.TINKOFF_TERMINAL_KEY;
+    const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD;
     const amountInCoins = Math.round(amount * 100);
 
     console.log(
