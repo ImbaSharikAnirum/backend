@@ -73,7 +73,7 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       console.log("🔐 Generated Token:", hash);
       return hash;
     };
-    onsole.log(
+    console.log(
       "TerminalPassword (char codes):",
       terminalPassword.split("").map((c) => c.charCodeAt(0))
     );
