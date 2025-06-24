@@ -54,6 +54,10 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       const sortedKeys = Object.keys(tokenParams).sort();
 
       const tokenString = sortedKeys.map((key) => tokenParams[key]).join("");
+      console.log(
+        "🔍 Buffer UTF-8 of token string:",
+        Buffer.from(tokenString, "utf8")
+      );
 
       console.log("🔐 Sorted keys for token:", sortedKeys);
       console.log("🔐 Token string before hash (raw):", tokenString);
