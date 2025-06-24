@@ -82,22 +82,22 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     const requestData = {
       ...paramsForToken,
       Token: token,
-      DATA: {
-        Email: user.email,
-      },
-      Receipt: {
-        Email: user.email,
-        Taxation: "usn_income",
-        Items: [
-          {
-            Name: "Курс рисования",
-            Price: amountInCoins,
-            Quantity: 1,
-            Amount: amountInCoins,
-            Tax: "none",
-          },
-        ],
-      },
+      // DATA: {
+      //   Email: user.email,
+      // },
+      // Receipt: {
+      //   Email: user.email,
+      //   Taxation: "usn_income",
+      //   Items: [
+      //     {
+      //       Name: "Курс рисования",
+      //       Price: amountInCoins,
+      //       Quantity: 1,
+      //       Amount: amountInCoins,
+      //       Tax: "none",
+      //     },
+      //   ],
+      // },
     };
 
     try {
