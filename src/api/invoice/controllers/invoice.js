@@ -27,8 +27,8 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       ? `order_invoice_${invoiceId}`
       : `order_${student}_${Date.now()}`;
 
-    const terminalKey = process.env.TINKOFF_TERMINAL_KEY;
-    const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD;
+    const terminalKey = process.env.TINKOFF_TERMINAL_KEY?.trim();
+    const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD?.trim();
     const amountInCoins = Math.round(amount * 100);
 
     console.log(
@@ -41,22 +41,19 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       `"${terminalPassword}"`,
       `length: ${terminalPassword.length}`
     );
-    const normalizeStr = (s) => s.normalize("NFC");
 
     const paramsForToken = {
       TerminalKey: terminalKey,
       Amount: amountInCoins,
-      OrderId: normalizeStr(orderId),
-      Description: normalizeStr(`Оплата курса`),
+      OrderId: orderId,
+      Description: `Оплата курса`,
     };
 
     const generateToken = (params, password) => {
       const tokenParams = { ...params, Password: password };
       const sortedKeys = Object.keys(tokenParams).sort();
 
-      const tokenString = sortedKeys
-        .map((key) => String(tokenParams[key]))
-        .join("");
+      const tokenString = sortedKeys.map((key) => tokenParams[key]).join("");
       console.log(
         "🔍 Buffer UTF-8 of token string:",
         Buffer.from(tokenString, "utf8")
@@ -73,31 +70,28 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       console.log("🔐 Generated Token:", hash);
       return hash;
     };
-    console.log(
-      "TerminalPassword (char codes):",
-      terminalPassword.split("").map((c) => c.charCodeAt(0))
-    );
+
     const token = generateToken(paramsForToken, terminalPassword);
 
     const requestData = {
       ...paramsForToken,
       Token: token,
-      // DATA: {
-      //   Email: user.email,
-      // },
-      // Receipt: {
-      //   Email: user.email,
-      //   Taxation: "usn_income",
-      //   Items: [
-      //     {
-      //       Name: "Курс рисования",
-      //       Price: amountInCoins,
-      //       Quantity: 1,
-      //       Amount: amountInCoins,
-      //       Tax: "none",
-      //     },
-      //   ],
-      // },
+      DATA: {
+        Email: user.email,
+      },
+      Receipt: {
+        Email: user.email,
+        Taxation: "usn_income",
+        Items: [
+          {
+            Name: "Курс рисования",
+            Price: amountInCoins,
+            Quantity: 1,
+            Amount: amountInCoins,
+            Tax: "none",
+          },
+        ],
+      },
     };
 
     try {
