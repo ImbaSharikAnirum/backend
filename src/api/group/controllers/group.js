@@ -171,11 +171,6 @@ module.exports = createCoreController("api::group.group", ({ strapi }) => ({
       // Находим курс для выбранной валюты
       const selectedCurrencyRate = currencies.find((c) => c.code === currency);
 
-      // Проверяем наличие фильтров
-      if (ctx.query.filters) {
-        console.log("Применяемые фильтры:", ctx.query.filters);
-      }
-
       // Вызываем стандартный метод find с переданными параметрами
       const { data, meta } = await super.find(ctx);
 
