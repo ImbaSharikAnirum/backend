@@ -45,12 +45,11 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     }
 
     const orderId = invoiceId
-      ? `order_invoice_${invoiceId}`
+      ? `order_invoice_${invoiceId}_${Date.now()}`
       : `order_${student}_${Date.now()}`;
 
     const terminalKey = process.env.TINKOFF_TERMINAL_KEY?.trim();
     const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD?.trim();
-
 
     const amountInCoins = Math.round(amount * 100);
 
@@ -98,7 +97,12 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     };
 
     try {
-      
+      console.log("🔄 Отправляем запрос к Tinkoff API:", {
+        orderId,
+        amount: amountInCoins,
+        userEmail,
+        invoiceId,
+      });
 
       const apiUrl = "https://securepay.tinkoff.ru/v2/Init";
 
@@ -106,7 +110,8 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
         headers: { "Content-Type": "application/json" },
       });
 
-      
+      console.log("✅ Ответ от Tinkoff API:", response.data);
+
       if (response.data.Success) {
         ctx.send({
           paymentUrl: response.data.PaymentURL,
@@ -129,9 +134,15 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
   async handleTinkoffNotification(ctx) {
     const { OrderId, Success, Status, PaymentId } = ctx.request.body;
 
-    const invoiceId = OrderId?.startsWith("order_invoice_")
-      ? OrderId.replace("order_invoice_", "")
-      : null;
+    // Обновляем извлечение invoiceId для нового формата orderId
+    let invoiceId = null;
+    if (OrderId?.startsWith("order_invoice_")) {
+      // Новый формат: order_invoice_123_1703123456789
+      const parts = OrderId.split("_");
+      if (parts.length >= 3) {
+        invoiceId = parts[2]; // Берем третью часть (invoiceId)
+      }
+    }
 
     try {
       if (Success && Status === "CONFIRMED" && invoiceId) {
