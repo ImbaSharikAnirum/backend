@@ -15,19 +15,43 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       invoiceId,
     } = ctx.request.body;
 
-    const user = await strapi.entityService.findOne(
-      "plugin::users-permissions.user",
-      userId
-    );
+    // Проверяем обязательные параметры
+    if (!amount || !currency) {
+      return ctx.throw(
+        400,
+        "Отсутствуют обязательные параметры: amount, currency"
+      );
+    }
 
-    // Если пользователь не найден — используем гостевую почту
-    const userEmail = user?.email || "guest@anirum.com";
+    // Исправляем запрос к базе данных - используем правильный сервис для поиска пользователя
+    let userEmail = "guest@anirum.com"; // Значение по умолчанию
+
+    if (userId) {
+      try {
+        const user = await strapi
+          .query("plugin::users-permissions.user")
+          .findOne({
+            where: { id: userId },
+            select: ["email"],
+          });
+
+        if (user && user.email) {
+          userEmail = user.email;
+        }
+      } catch (error) {
+        console.error("Ошибка при поиске пользователя:", error);
+        // Продолжаем с email по умолчанию
+      }
+    }
+
     const orderId = invoiceId
       ? `order_invoice_${invoiceId}`
       : `order_${student}_${Date.now()}`;
 
     const terminalKey = process.env.TINKOFF_TERMINAL_KEY?.trim();
     const terminalPassword = process.env.TINKOFF_TERMINAL_PASSWORD?.trim();
+
+
     const amountInCoins = Math.round(amount * 100);
 
     const paramsForToken = {
@@ -41,7 +65,6 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
       const tokenParams = { ...params, Password: password };
       const sortedKeys = Object.keys(tokenParams).sort();
       const tokenString = sortedKeys.map((key) => tokenParams[key]).join("");
-
 
       const hash = crypto
         .createHash("sha256")
@@ -75,12 +98,15 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
     };
 
     try {
+      
+
       const apiUrl = "https://securepay.tinkoff.ru/v2/Init";
 
       const response = await axios.post(apiUrl, requestData, {
         headers: { "Content-Type": "application/json" },
       });
 
+      
       if (response.data.Success) {
         ctx.send({
           paymentUrl: response.data.PaymentURL,
@@ -88,6 +114,7 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
           message: "Ссылка на оплату создана",
         });
       } else {
+        console.error("❌ Ошибка Tinkoff API:", response.data);
         ctx.throw(400, `Ошибка создания платежа: ${response.data.Message}`);
       }
     } catch (error) {
@@ -101,7 +128,6 @@ module.exports = createCoreController("api::invoice.invoice", ({ strapi }) => ({
 
   async handleTinkoffNotification(ctx) {
     const { OrderId, Success, Status, PaymentId } = ctx.request.body;
-
 
     const invoiceId = OrderId?.startsWith("order_invoice_")
       ? OrderId.replace("order_invoice_", "")
