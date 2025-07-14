@@ -146,6 +146,13 @@
       "relation": "manyToMany",
       "target": "api::skill-tree.skill-tree",
       "mappedBy": "savedBy"
+    },
+    "requestedTeacherRole": {
+      "type": "boolean",
+      "default": false
+    },
+    "rejectedAt": {
+      "type": "datetime"
     }
   }
 }

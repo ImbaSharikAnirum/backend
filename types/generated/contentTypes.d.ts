@@ -816,6 +816,8 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       'manyToMany',
       'api::skill-tree.skill-tree'
     >;
+    requestedTeacherRole: Attribute.Boolean & Attribute.DefaultTo<false>;
+    rejectedAt: Attribute.DateTime;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -1197,6 +1199,9 @@ export interface ApiGroupGroup extends Schema.CollectionType {
     course_type: Attribute.String;
     display_location_name: Attribute.String;
     currency: Attribute.String;
+    status: Attribute.Enumeration<
+      ['draft', 'pending', 'published', 'rejected']
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

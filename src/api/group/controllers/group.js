@@ -68,6 +68,29 @@ module.exports = createCoreController("api::group.group", ({ strapi }) => ({
       // Получаем ID текущего пользователя
       const userId = ctx.state.user ? ctx.state.user.id : null;
 
+      // Определяем статус группы в зависимости от роли пользователя
+      let groupStatus = "draft"; // По умолчанию
+      let shouldPublish = false;
+
+      if (ctx.state.user && ctx.state.user.role) {
+        const userRole = ctx.state.user.role.type;
+        console.log("Создание группы - Роль пользователя:", {
+          userId: ctx.state.user.id,
+          role: userRole,
+        });
+
+        if (userRole === "manager") {
+          groupStatus = "published";
+          shouldPublish = true;
+        } else if (userRole === "teacher") {
+          groupStatus = "pending";
+        }
+      } else {
+        console.log(
+          "Создание группы - Пользователь не авторизован или роль не определена"
+        );
+      }
+
       // Создаем группу со всеми полями и связями
       const newGroup = await strapi.service("api::group.group").create({
         data: {
@@ -118,6 +141,8 @@ module.exports = createCoreController("api::group.group", ({ strapi }) => ({
           name_en: courseData.name_en,
           streetNumber_en: courseData.streetNumber_en,
 
+          status: courseData.status,
+
           name_original_language: courseData.name_original_language,
           country_original_language: courseData.country_original_language,
           city_original_language: courseData.city_original_language,
@@ -137,8 +162,8 @@ module.exports = createCoreController("api::group.group", ({ strapi }) => ({
           images: imageIds.length > 0 ? imageIds : undefined,
           teacher: courseData.teacher ? courseData.teacher : undefined,
 
-          // Автоматическая публикация
-          publishedAt: new Date(),
+          // Статус группы в зависимости от роли
+          status: groupStatus,
         },
         populate: ["images", "teacher"],
       });
