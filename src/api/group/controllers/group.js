@@ -142,6 +142,7 @@ module.exports = createCoreController("api::group.group", ({ strapi }) => ({
           streetNumber_en: courseData.streetNumber_en,
 
           status: courseData.status,
+          min_students: courseData.min_students,
 
           name_original_language: courseData.name_original_language,
           country_original_language: courseData.country_original_language,

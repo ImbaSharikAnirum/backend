@@ -183,6 +183,9 @@
         "published",
         "rejected"
       ]
+    },
+    "min_students": {
+      "type": "integer"
     }
   }
 }

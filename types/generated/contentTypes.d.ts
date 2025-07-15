@@ -1202,6 +1202,7 @@ export interface ApiGroupGroup extends Schema.CollectionType {
     status: Attribute.Enumeration<
       ['draft', 'pending', 'published', 'rejected']
     >;
+    min_students: Attribute.Integer;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
